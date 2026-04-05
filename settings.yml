@@ -6,7 +6,7 @@
 card_width:
   type: string
   default: 420px
-  description: "Any valid CSS width, e.g. 420px, 32rem, 40vw, min(420px, calc(100vw - 32px))"
+  description: "Any valid CSS width, e.g. 420px, 32rem, 40vw, clamp(18rem, 40vw, 28rem)"
 
 card_max_height:
   type: string
