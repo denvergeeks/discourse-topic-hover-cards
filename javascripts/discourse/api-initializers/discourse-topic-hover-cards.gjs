@@ -11,6 +11,8 @@ import { ajax } from "discourse/lib/ajax";
 //
 // On mobile (touch devices) the card opens on tap when
 // enable_on_mobile is true, and a second tap navigates.
+// Thumbnail placement is configurable on desktop, but
+// forced to "top" on mobile for simpler layout.
 // -------------------------------------------------------
 
 const DELAY_SHOW = settings.card_delay_ms ?? 300;
@@ -63,13 +65,17 @@ function stripHtml(html) {
 
 function skeletonHTML() {
   return `
-    <div class="topic-hover-card__skeleton">
-      <div class="skeleton-line title"></div>
-      <div class="skeleton-line title-2"></div>
-      <div class="skeleton-line excerpt"></div>
-      <div class="skeleton-line excerpt-2"></div>
-      <div class="skeleton-line excerpt-3"></div>
-      <div class="skeleton-line meta"></div>
+    <div class="topic-hover-card">
+      <div class="topic-hover-card__body">
+        <div class="topic-hover-card__skeleton">
+          <div class="skeleton-line title"></div>
+          <div class="skeleton-line title-2"></div>
+          <div class="skeleton-line excerpt"></div>
+          <div class="skeleton-line excerpt-2"></div>
+          <div class="skeleton-line excerpt-3"></div>
+          <div class="skeleton-line meta"></div>
+        </div>
+      </div>
     </div>`;
 }
 
@@ -89,6 +95,9 @@ function dIconSVG(name) {
 }
 
 function buildCardHTML(topic, isMobile = false) {
+  const configuredPlacement = settings.thumbnail_placement || "top";
+  const placement = isMobile ? "top" : configuredPlacement;
+
   const thumbnail =
     topic.image_url && settings.show_thumbnail
       ? `<div class="topic-hover-card__thumbnail">
@@ -204,16 +213,53 @@ function buildCardHTML(topic, isMobile = false) {
       ? `<div class="topic-hover-card__tap-hint">Tap the link again to open</div>`
       : "";
 
-  return `
-    ${thumbnail}
-    <div class="topic-hover-card__body">
+  const bodyInner = `
       ${categoryHTML}
       ${titleHTML}
       ${excerpt}
       ${opHTML}
       ${metadata}
       ${tapHint}
-    </div>`;
+  `;
+
+  switch (placement) {
+    case "left":
+      return `
+        <div class="topic-hover-card topic-hover-card--thumb-left">
+          ${thumbnail}
+          <div class="topic-hover-card__body">
+            ${bodyInner}
+          </div>
+        </div>`;
+
+    case "right":
+      return `
+        <div class="topic-hover-card topic-hover-card--thumb-right">
+          ${thumbnail}
+          <div class="topic-hover-card__body">
+            ${bodyInner}
+          </div>
+        </div>`;
+
+    case "bottom":
+      return `
+        <div class="topic-hover-card topic-hover-card--thumb-bottom">
+          <div class="topic-hover-card__body">
+            ${bodyInner}
+          </div>
+          ${thumbnail}
+        </div>`;
+
+    case "top":
+    default:
+      return `
+        <div class="topic-hover-card topic-hover-card--thumb-top">
+          ${thumbnail}
+          <div class="topic-hover-card__body">
+            ${bodyInner}
+          </div>
+        </div>`;
+  }
 }
 
 export default apiInitializer((api) => {
@@ -241,10 +287,6 @@ export default apiInitializer((api) => {
     tooltip.setAttribute("aria-live", "polite");
     tooltip.style.setProperty("--thc-width", CARD_WIDTH + "px");
     tooltip.style.setProperty("--thc-max-h", CARD_MAX_H + "px");
-
-    const card = document.createElement("div");
-    card.className = "topic-hover-card";
-    tooltip.appendChild(card);
 
     tooltip.addEventListener("mouseenter", () => {
       isInsideCard = true;
@@ -305,23 +347,23 @@ export default apiInitializer((api) => {
     }
 
     currentTopicId = topicId;
-    const card = cardEl();
 
     if (topicCache[topicId]) {
-      card.innerHTML = buildCardHTML(topicCache[topicId], onMobile);
+      tooltip.innerHTML = buildCardHTML(topicCache[topicId], onMobile);
     } else {
-      card.innerHTML = skeletonHTML();
+      tooltip.innerHTML = skeletonHTML();
       fetchTopic(topicId)
         .then((data) => {
           if (currentTopicId === topicId) {
-            card.innerHTML = buildCardHTML(data, onMobile);
+            topicCache[topicId] = data;
+            tooltip.innerHTML = buildCardHTML(data, onMobile);
             positionTooltip(anchorRect);
           }
         })
         .catch(() => {
           if (currentTopicId === topicId) {
-            card.innerHTML =
-              `<div class="topic-hover-card__loading">Could not load topic.</div>`;
+            tooltip.innerHTML =
+              `<div class="topic-hover-card"><div class="topic-hover-card__body"><div class="topic-hover-card__loading">Could not load topic.</div></div></div>`;
           }
         });
     }
