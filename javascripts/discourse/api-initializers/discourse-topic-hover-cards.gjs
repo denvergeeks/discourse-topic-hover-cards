@@ -13,6 +13,7 @@ import { ajax } from "discourse/lib/ajax";
 // enable_on_mobile is true, and a second tap navigates.
 // Thumbnail placement is configurable on desktop, but
 // forced to "top" on mobile for simpler layout.
+// Width and max-height accept any valid CSS value.
 // -------------------------------------------------------
 
 const DELAY_SHOW = settings.card_delay_ms ?? 300;
@@ -299,10 +300,6 @@ export default apiInitializer((api) => {
     });
 
     document.body.appendChild(tooltip);
-  }
-
-  function cardEl() {
-    return tooltip?.querySelector(".topic-hover-card");
   }
 
   function positionTooltip(anchorRect) {
