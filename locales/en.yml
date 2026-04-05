@@ -1,10 +1,46 @@
 en:
   theme_metadata:
-    description: "Shows topic cards as hover tooltips when mousing over topic links inside topics and replies."
-  js:
-    discourse_topic_hover_cards:
-      published: "Published"
-      views: "Views"
-      replies: "Replies"
-      likes: "Likes"
-      loading: "Loading..."
+    description: "Shows topic cards as hover tooltips inside topics, replies, topic lists, and suggested topic links."
+
+  settings:
+    card_width: "Card width"
+    card_width_description: "Maximum width of the hover card in pixels."
+
+    card_max_height: "Card max height"
+    card_max_height_description: "Maximum height of the hover card in pixels. Inner content scrolls if needed."
+
+    card_delay_ms: "Hover delay"
+    card_delay_ms_description: "Delay in milliseconds before the hover card appears."
+
+    enable_on_mobile: "Enable on mobile"
+    enable_on_mobile_description: "Enable tap-to-preview behavior on touch devices."
+
+    show_thumbnail: "Show thumbnail"
+    show_thumbnail_description: "Display the topic thumbnail image when available."
+
+    thumbnail_placement: "Thumbnail placement"
+    thumbnail_placement_description: "Choose where the thumbnail appears on desktop. On mobile, the thumbnail is always shown at the top."
+
+    show_title: "Show topic title"
+    show_title_description: "Display the topic title inside the card."
+
+    show_excerpt: "Show excerpt"
+    show_excerpt_description: "Display a cleaned excerpt from the topic, excluding image metadata and captions."
+
+    show_op: "Show original poster"
+    show_op_description: "Display the original poster avatar and username."
+
+    show_publish_date: "Show publish date"
+    show_publish_date_description: "Display the topic creation date."
+
+    show_views: "Show views"
+    show_views_description: "Display the topic view count."
+
+    show_reply_count: "Show reply count"
+    show_reply_count_description: "Display the topic reply count."
+
+    show_likes: "Show likes"
+    show_likes_description: "Display the topic like count."
+
+    show_activity: "Show last activity"
+    show_activity_description: "Display the most recent topic activity date."
