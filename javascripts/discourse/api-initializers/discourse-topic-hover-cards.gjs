@@ -17,8 +17,8 @@ import { ajax } from "discourse/lib/ajax";
 
 const DELAY_SHOW = settings.card_delay_ms ?? 300;
 const DELAY_HIDE = 200;
-const CARD_WIDTH = settings.card_width ?? 420;
-const CARD_MAX_H = settings.card_max_height ?? 480;
+const CARD_WIDTH = settings.card_width || "420px";
+const CARD_MAX_H = settings.card_max_height || "480px";
 const MOBILE_ENABLED = settings.enable_on_mobile ?? false;
 const VIEWPORT_MARGIN = 12;
 
@@ -285,8 +285,8 @@ export default apiInitializer((api) => {
     tooltip.className = "topic-hover-card-tooltip";
     tooltip.setAttribute("role", "tooltip");
     tooltip.setAttribute("aria-live", "polite");
-    tooltip.style.setProperty("--thc-width", CARD_WIDTH + "px");
-    tooltip.style.setProperty("--thc-max-h", CARD_MAX_H + "px");
+    tooltip.style.setProperty("--thc-width", CARD_WIDTH);
+    tooltip.style.setProperty("--thc-max-h", CARD_MAX_H);
 
     tooltip.addEventListener("mouseenter", () => {
       isInsideCard = true;
@@ -310,8 +310,8 @@ export default apiInitializer((api) => {
 
     const vw = window.innerWidth;
     const vh = window.innerHeight;
-    const cardH = Math.min(tooltip.offsetHeight || 320, CARD_MAX_H);
-    const cardW = Math.min(CARD_WIDTH, vw - VIEWPORT_MARGIN * 2);
+    const cardH = tooltip.offsetHeight || 320;
+    const cardW = Math.min(tooltip.offsetWidth || 420, vw - VIEWPORT_MARGIN * 2);
 
     let top = anchorRect.bottom + 10;
     let isAbove = false;
