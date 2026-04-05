@@ -80,9 +80,16 @@
   &--thumb-right {
     flex-direction: row;
 
+    &--thumb-left,
+    &--thumb-right {
+      .topic-hover-card__body {
+        padding: 0.7rem 0.85rem;
+      }
+    }
+
     .topic-hover-card__thumbnail {
-      flex: 0 0 140px;
-      width: 140px;
+      flex: 0 0 7.5rem;
+      width: 7.5rem;
       height: auto;
       min-height: 100%;
     }
