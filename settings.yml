@@ -25,6 +25,15 @@ show_thumbnail:
   type: bool
   default: true
 
+thumbnail_placement:
+  type: enum
+  default: top
+  choices:
+    - top
+    - left
+    - right
+    - bottom
+
 show_title:
   type: bool
   default: true
