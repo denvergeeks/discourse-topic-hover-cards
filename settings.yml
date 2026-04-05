@@ -5,12 +5,12 @@
 # --- Card dimensions ---
 card_width:
   type: string
-  default: 420px
+  default: 24rem
   description: "Any valid CSS width, e.g. 420px, 32rem, 40vw, clamp(18rem, 40vw, 28rem)"
 
 card_max_height:
   type: string
-  default: 480px
+  default: 18rem
   description: "Any valid CSS max-height, e.g. 480px, 60vh, 32rem, min(70vh, 560px)"
 
 # --- Behaviour ---
@@ -29,7 +29,7 @@ show_thumbnail:
 
 thumbnail_placement:
   type: enum
-  default: top
+  default: left
   choices:
     - top
     - left
