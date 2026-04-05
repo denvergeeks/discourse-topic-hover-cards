@@ -48,9 +48,17 @@ function fmtNum(n) {
 
 function stripHtml(html) {
   if (!html) return "";
-  const t = document.createElement("div");
-  t.innerHTML = html;
-  return t.textContent || t.innerText || "";
+
+  const doc = new DOMParser().parseFromString(html, "text/html");
+
+  doc
+    .querySelectorAll(
+      "figure, figcaption, img, picture, source, .lightbox-wrapper, .image-wrapper, .d-lazyload"
+    )
+    .forEach((el) => el.remove());
+
+  const text = (doc.body.textContent || "").replace(/\s+/g, " ").trim();
+  return text;
 }
 
 function skeletonHTML() {
@@ -113,9 +121,12 @@ function buildCardHTML(topic, isMobile = false) {
     firstPost?.cooked ||
     "";
 
+  const cleanedExcerpt = stripHtml(excerptSource);
+  const finalExcerpt = cleanedExcerpt.length >= 20 ? cleanedExcerpt : "";
+
   const excerpt =
-    settings.show_excerpt && excerptSource
-      ? `<div class="topic-hover-card__excerpt">${stripHtml(excerptSource)}</div>`
+    settings.show_excerpt && finalExcerpt
+      ? `<div class="topic-hover-card__excerpt">${finalExcerpt}</div>`
       : "";
 
   let opHTML = "";
