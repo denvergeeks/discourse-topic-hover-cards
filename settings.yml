@@ -6,6 +6,7 @@
 card_width:
   type: integer
   default: 420
+
 card_max_height:
   type: integer
   default: 480
@@ -14,6 +15,7 @@ card_max_height:
 card_delay_ms:
   type: integer
   default: 300
+
 enable_on_mobile:
   type: bool
   default: false
@@ -22,9 +24,15 @@ enable_on_mobile:
 show_thumbnail:
   type: bool
   default: true
+
+show_title:
+  type: bool
+  default: true
+
 show_excerpt:
   type: bool
   default: true
+
 show_op:
   type: bool
   default: true
@@ -33,15 +41,19 @@ show_op:
 show_publish_date:
   type: bool
   default: true
+
 show_views:
   type: bool
   default: true
+
 show_reply_count:
   type: bool
   default: true
+
 show_likes:
   type: bool
   default: true
+
 show_activity:
   type: bool
   default: true
