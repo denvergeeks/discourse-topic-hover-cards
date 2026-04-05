@@ -1,0 +1,10 @@
+en:
+  theme_metadata:
+    description: "Shows topic cards as hover tooltips when mousing over topic links inside topics and replies."
+  js:
+    discourse_topic_hover_cards:
+      published: "Published"
+      views: "Views"
+      replies: "Replies"
+      likes: "Likes"
+      loading: "Loading..."

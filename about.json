@@ -1,0 +1,11 @@
+{
+  "name": "Discourse Topic Hover Cards",
+  "about_url": "https://github.com/denvergeeks/discourse-topic-hover-cards",
+  "license_url": "https://github.com/denvergeeks/discourse-topic-hover-cards/blob/main/LICENSE",
+  "authors": [
+    {
+      "name": "denvergeeks",
+      "github_username": "denvergeeks"
+    }
+  ]
+}
