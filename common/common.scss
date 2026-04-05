@@ -40,7 +40,7 @@
     border-bottom: 6px solid var(--secondary);
   }
 
-  // flip arrow when card is positioned above the cursor
+  // Flip arrow when card is positioned above the link
   &.is-above {
     &::before {
       top: auto;
@@ -61,6 +61,9 @@
 .topic-hover-card {
   width: var(--thc-width, 420px);
   max-width: min(var(--thc-width, 420px), calc(100vw - 32px));
+  // card_max_height is injected as --thc-max-h by the JS
+  max-height: var(--thc-max-h, 480px);
+  overflow-y: auto;
   background: var(--secondary);
   border: 1px solid var(--primary-low);
   border-radius: var(--d-border-radius, 8px);
@@ -76,16 +79,13 @@
     height: 160px;
     overflow: hidden;
     background: var(--primary-very-low);
+    flex-shrink: 0;
 
     img {
       width: 100%;
       height: 100%;
       object-fit: cover;
       display: block;
-    }
-
-    &.no-image {
-      display: none;
     }
   }
 
@@ -130,7 +130,7 @@
     min-height: 2.5em;
   }
 
-  // ---- op ----
+  // ---- op / author ----
   &__op {
     display: flex;
     align-items: center;
@@ -215,12 +215,68 @@
       animation: thc-shimmer 1.4s ease-in-out infinite;
       margin-bottom: 0.5rem;
 
-      &.title { height: 1.1em; width: 85%; }
+      &.title   { height: 1.1em; width: 85%; }
       &.title-2 { height: 1.1em; width: 65%; margin-bottom: 0.75rem; }
-      &.excerpt { width: 100%; }
+      &.excerpt   { width: 100%; }
       &.excerpt-2 { width: 92%; }
       &.excerpt-3 { width: 70%; margin-bottom: 0.75rem; }
-      &.meta { width: 45%; height: 0.75em; }
+      &.meta    { width: 45%; height: 0.75em; }
+    }
+  }
+}
+
+// ---- Mobile: bottom-sheet style when enable_on_mobile is true ----
+// On touch devices the tooltip anchors to the bottom of the viewport
+// so it's within thumb reach and can't clip off-screen.
+@media (hover: none) and (pointer: coarse) {
+  .topic-hover-card-tooltip {
+    // Override JS-set top/left positioning
+    top: auto !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 100% !important;
+    transform: translateY(100%);
+    border-radius: 0;
+    // Slide up instead of fade+scale
+    transition: transform 200ms cubic-bezier(0.16, 1, 0.3, 1),
+                opacity   160ms cubic-bezier(0.16, 1, 0.3, 1);
+
+    &.is-visible {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    // Hide the pointer arrow on mobile
+    &::before, &::after { display: none; }
+  }
+
+  .topic-hover-card {
+    width: 100% !important;
+    max-width: 100% !important;
+    max-height: 55vh;
+    overflow-y: auto;
+    border-radius: 12px 12px 0 0;
+    box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.18);
+
+    // Drag handle hint
+    &::before {
+      content: "";
+      display: block;
+      width: 36px;
+      height: 4px;
+      background: var(--primary-low);
+      border-radius: 2px;
+      margin: 8px auto 4px;
+    }
+
+    // Hint text: "Tap again to open"
+    &__tap-hint {
+      display: block;
+      text-align: center;
+      font-size: var(--font-down-2-rem);
+      color: var(--primary-medium);
+      padding: 0.25rem 0 0.5rem;
     }
   }
 }
