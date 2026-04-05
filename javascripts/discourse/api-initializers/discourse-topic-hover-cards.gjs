@@ -105,9 +105,17 @@ function buildCardHTML(topic, isMobile = false) {
     ? `<div class="topic-hover-card__title">${title}</div>`
     : "";
 
+  const firstPost = topic.post_stream?.posts?.[0];
+
+  const excerptSource =
+    topic.excerpt ||
+    firstPost?.excerpt ||
+    firstPost?.cooked ||
+    "";
+
   const excerpt =
-    settings.show_excerpt && topic.excerpt
-      ? `<div class="topic-hover-card__excerpt">${stripHtml(topic.excerpt)}</div>`
+    settings.show_excerpt && excerptSource
+      ? `<div class="topic-hover-card__excerpt">${stripHtml(excerptSource)}</div>`
       : "";
 
   let opHTML = "";
