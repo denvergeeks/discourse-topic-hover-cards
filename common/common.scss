@@ -58,7 +58,7 @@
 
 .topic-hover-card {
   width: var(--thc-width, 420px);
-  max-width: min(var(--thc-width, 420px), calc(100vw - 32px));
+  max-width: calc(100vw - 32px);
   max-height: var(--thc-max-h, 480px);
   display: flex;
   flex-direction: column;
