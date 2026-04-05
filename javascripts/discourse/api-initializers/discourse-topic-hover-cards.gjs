@@ -468,7 +468,11 @@ export default apiInitializer((api) => {
 
   document.addEventListener(
     "scroll",
-    () => {
+    (event) => {
+      if (event.target?.closest?.(".topic-hover-card, .topic-hover-card-tooltip")) {
+        return;
+      }
+
       cancel(showTimer);
       hideCard();
       mobileTappedLink = null;
