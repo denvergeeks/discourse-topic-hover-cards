@@ -1,5 +1,6 @@
 {
   "name": "Discourse Topic Hover Cards",
+  "component": true,
   "about_url": "https://github.com/denvergeeks/discourse-topic-hover-cards",
   "license_url": "https://github.com/denvergeeks/discourse-topic-hover-cards/blob/main/LICENSE",
   "authors": [
