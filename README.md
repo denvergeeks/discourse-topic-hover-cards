@@ -30,7 +30,7 @@ When users hover a topic link (or tap on mobile), a card appears with the topic 
   - Views, replies, likes, last activity
 - Per-user opt-out using a custom user field
 - Admin-only debug mode for safe troubleshooting
-- 
+  
 ---
 
 ## Settings
