@@ -406,13 +406,10 @@ function inCategoryHomepageTopicList(link) {
     !!document.querySelector(".categories-and-featured-topics") ||
     !!document.querySelector(".categories-with-featured-topics") ||
     !!document.querySelector(".categories-only") ||
-    window.location.pathname === "/categories";
+    window.location.pathname === "/categories" ||
+    window.location.pathname === "/";
 
-  if (!inCategoriesHomepage) {
-    return false;
-  }
-
-  return true;
+  return inCategoriesHomepage;
 }
 
 function buildCardHTML(topic, site, isMobile = false) {
@@ -871,121 +868,55 @@ export default apiInitializer((api) => {
       return data;
     }
 
-function linkInSupportedArea(link) {
-  const href = link.href;
+    function linkInSupportedArea(link) {
+      const inSuggested = !!link.closest(".suggested-topics");
+      if (inSuggested) {
+        return settings.enable_on_suggested_topic_links;
+      }
 
-  const inSuggested = !!link.closest(".suggested-topics");
-  if (inSuggested) {
-    debugLog("Matched suggested topics branch", {
-      href,
-      bodyClasses: [...document.body.classList],
-      htmlClasses: [...document.documentElement.classList],
-    });
-    return settings.enable_on_suggested_topic_links;
-  }
+      if (inDocCategoriesView(link)) {
+        return settings.enable_on_doc_categories;
+      }
 
-  if (inDocCategoriesView(link)) {
-    debugLog("Matched Doc Categories branch", {
-      href,
-      bodyClasses: [...document.body.classList],
-      htmlClasses: [...document.documentElement.classList],
-    });
-    return settings.enable_on_doc_categories;
-  }
+      if (inKanbanView(link)) {
+        return settings.enable_on_kanban_boards;
+      }
 
-  if (inKanbanView(link)) {
-    debugLog("Matched Kanban branch", {
-      href,
-      bodyClasses: [...document.body.classList],
-      htmlClasses: [...document.documentElement.classList],
-    });
-    return settings.enable_on_kanban_boards;
-  }
+      if (inCategoryHomepageTopicList(link)) {
+        return settings.enable_on_category_homepage_topic_lists;
+      }
 
-  if (inCategoryHomepageTopicList(link)) {
-    debugLog("Matched category homepage topic list branch", {
-      href,
-      pathname: window.location.pathname,
-      bodyClasses: [...document.body.classList],
-      htmlClasses: [...document.documentElement.classList],
-      settingValue: settings.enable_on_category_homepage_topic_lists,
-    });
-    return settings.enable_on_category_homepage_topic_lists;
-  }
+      const inTopicList =
+        !!link.closest(".topic-list") || !!link.closest("[class*='topic-list']");
+      if (inTopicList) {
+        return settings.enable_on_topic_lists;
+      }
 
-  const inTopicList = !!link.closest(".topic-list") || !!link.closest("[class*='topic-list']");
-  if (inTopicList) {
-    debugLog("Matched generic topic list branch", {
-      href,
-      pathname: window.location.pathname,
-      bodyClasses: [...document.body.classList],
-      htmlClasses: [...document.documentElement.classList],
-      settingValue: settings.enable_on_topic_lists,
-    });
-    return settings.enable_on_topic_lists;
-  }
+      const post = link.closest(".topic-post");
+      const inPostCooked = !!link.closest(".topic-post .cooked");
 
-  const post = link.closest(".topic-post");
-  const inPostCooked = !!link.closest(".topic-post .cooked");
+      if (inPostCooked && post) {
+        const isFirstPost = post.classList.contains("topic-owner");
+        return isFirstPost
+          ? settings.enable_on_topics
+          : settings.enable_on_replies;
+      }
 
-  if (inPostCooked && post) {
-    const isFirstPost = post.classList.contains("topic-owner");
-
-    debugLog("Matched post branch", {
-      href,
-      isFirstPost,
-      pathname: window.location.pathname,
-      bodyClasses: [...document.body.classList],
-      htmlClasses: [...document.documentElement.classList],
-    });
-
-    if (isFirstPost) {
-      return settings.enable_on_topics;
-    } else {
-      return settings.enable_on_replies;
+      return false;
     }
-  }
 
-  debugLog("No supported location matched", {
-    href,
-    pathname: window.location.pathname,
-    closestTopicList: !!link.closest(".topic-list"),
-    closestAnyTopicList: !!link.closest("[class*='topic-list']"),
-    bodyClasses: [...document.body.classList],
-    htmlClasses: [...document.documentElement.classList],
-  });
+    function onMouseEnter(event) {
+      if (isMobileView()) return;
 
-  return false;
-}
+      const link = event.target.closest("a[href]");
+      if (!link) return;
+      if (!linkInSupportedArea(link)) return;
 
-function onMouseEnter(event) {
-  if (isMobileView()) return;
+      const topicId = topicIdFromHref(link.href);
+      if (!topicId) return;
 
-  const link = event.target.closest("a[href]");
-  if (!link) return;
-
-  const supported = linkInSupportedArea(link);
-  if (!supported) return;
-
-  const topicId = topicIdFromHref(link.href);
-
-  debugLog("onMouseEnter reached supported link", {
-    href: link.href,
-    topicId,
-    pathname: window.location.pathname,
-    bodyClasses: [...document.body.classList],
-    htmlClasses: [...document.documentElement.classList],
-  });
-
-  if (!topicId) {
-    debugLog("No topic ID parsed from supported link", {
-      href: link.href,
-    });
-    return;
-  }
-
-  scheduleShow(topicId, link.getBoundingClientRect());
-}
+      scheduleShow(topicId, link.getBoundingClientRect());
+    }
 
     function onMouseLeave(event) {
       if (isMobileView()) return;
