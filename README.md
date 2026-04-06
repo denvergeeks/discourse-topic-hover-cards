@@ -165,8 +165,8 @@ Mobile behavior includes:
 
 ### Mobile image sizing
 
-- `image_size_percent_mobile`  
-  Controls the mobile thumbnail height in the bottom-sheet layout. Higher values make the mobile image taller.
+- `mobile_thumbnail_height`  
+  Controls the mobile thumbnail height in pixels for the bottom-sheet layout.
 
 ## Defaults
 
@@ -201,7 +201,7 @@ Current defaults:
 ### Mobile defaults
 
 - `show_thumbnail_mobile: true`
-- `image_size_percent_mobile: 100`
+- `mobile_thumbnail_height: 160`
 - `show_category_mobile: true`
 - `show_tags_mobile: true`
 - `show_title_mobile: true`
