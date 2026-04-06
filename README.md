@@ -75,7 +75,25 @@ Settings:
 - `density_mobile`  
   Controls mobile hover card density.
 
-These settings adjust spacing, text rhythm, gaps, and overall compactness of the hover card while preserving the configured mobile thumbnail height.
+Density settings adjust the compactness of the hover card content, including spacing, padding, gaps, and text rhythm.
+
+Density settings do **not** control desktop thumbnail size.
+
+Desktop thumbnail size and placement are controlled by these layout settings instead:
+
+- `thumbnail_placement`
+- `image_size_percent`
+
+Mobile thumbnail size is controlled separately by:
+
+- `mobile_thumbnail_height`
+- Note: Density affects content rhythm, not thumbnail dimensions. (Density settings do not change thumbnail dimensions. Desktop thumbnail size is controlled by `thumbnail_placement` and `image_size_percent`, while mobile thumbnail height is controlled by `mobile_thumbnail_height`.)
+
+This separation is intentional:
+
+- layout settings control image size and placement
+- density settings control spacing and content compactness
+- visibility settings control which content elements appear
 
 ### Content visibility
 
