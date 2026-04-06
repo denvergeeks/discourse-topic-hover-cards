@@ -160,7 +160,7 @@
     gap: 0.65rem 0.7rem;
     flex-wrap: wrap;
     border-top: 1px solid var(--primary-low);
-    padding-top: 0.5rem;
+    padding-top: 0.25rem;
     margin-top: 0.25rem;
     color: var(--primary-medium);
   }
@@ -217,8 +217,8 @@
     white-space: nowrap;
 
     .d-icon {
-      width: 0.85em;
-      height: 0.85em;
+      width: 0.75em;
+      height: 0.75em;
       color: var(--primary-medium);
       flex-shrink: 0;
     }
@@ -233,7 +233,7 @@
 
   &__skeleton {
     .skeleton-line {
-      height: 0.85em;
+      height: 0.5em;
       border-radius: 4px;
       background: linear-gradient(
         90deg,
@@ -246,14 +246,14 @@
       margin-bottom: 0.5rem;
 
       &.title {
-        height: 1.1em;
+        height: 1em;
         width: 85%;
       }
 
       &.title-2 {
-        height: 1.1em;
+        height: 1em;
         width: 65%;
-        margin-bottom: 0.75rem;
+        margin-bottom: 0.5rem;
       }
 
       &.excerpt {
@@ -266,7 +266,7 @@
 
       &.excerpt-3 {
         width: 70%;
-        margin-bottom: 0.75rem;
+        margin-bottom: 0.5rem;
       }
 
       &.meta {
