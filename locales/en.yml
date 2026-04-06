@@ -119,3 +119,9 @@ en:
 
     show_activity_mobile: "Show last activity on mobile"
     show_activity_mobile_description: "Display the most recent topic activity date on mobile."
+
+    debug_mode: "Debug mode"
+    debug_mode_description: "Log hover-card field detection details to the browser console for staff debugging."
+
+    resolve_user_field_id_for_admins: "Resolve user field ID for admins"
+    resolve_user_field_id_for_admins_description: "When enabled, admins can fetch /admin/config/user-fields.json to map the configured user field name to its numeric user_field_ID key."
