@@ -8,6 +8,8 @@ const CARD_WIDTH = settings.card_width || "32rem";
 const CARD_MAX_H = settings.card_max_height || "10rem";
 const MOBILE_ENABLED = settings.enable_on_mobile ?? false;
 const MOBILE_WIDTH_PERCENT = settings.mobile_width_percent ?? 100;
+const USER_PREFERENCE_FIELD_NAME =
+  settings.user_preference_field_name || "disable_topic_hover_cards";
 const VIEWPORT_MARGIN = 12;
 
 const TOPIC_LINK_RE = /\/t\/(?:[^/]+\/)?([0-9]+)(?:\/[0-9]+)?/;
@@ -112,6 +114,26 @@ function mobileInt(name, mobileName, fallback, isMobile) {
   return isMobile
     ? settings[mobileName] ?? settings[name] ?? fallback
     : settings[name] ?? fallback;
+}
+
+function fieldValueIsTruthy(value) {
+  if (value === true || value === 1) return true;
+  if (typeof value === "string") {
+    const normalized = value.trim().toLowerCase();
+    return ["1", "true", "yes", "on", "checked"].includes(normalized);
+  }
+  return false;
+}
+
+function hoverCardsDisabledForUser(currentUser) {
+  if (!currentUser || !USER_PREFERENCE_FIELD_NAME) return false;
+
+  const fields =
+    currentUser.custom_fields ||
+    currentUser.user_fields ||
+    {};
+
+  return fieldValueIsTruthy(fields[USER_PREFERENCE_FIELD_NAME]);
 }
 
 function buildCardHTML(topic, site, isMobile = false) {
@@ -386,7 +408,12 @@ function buildCardHTML(topic, site, isMobile = false) {
 
 export default apiInitializer((api) => {
   const site = api.container.lookup("service:site");
+  const currentUser = api.getCurrentUser?.() || api.container.lookup("service:current-user");
   const onMobile = site.mobileView || isTouchDevice();
+
+  if (hoverCardsDisabledForUser(currentUser)) {
+    return;
+  }
 
   if (onMobile && !MOBILE_ENABLED) {
     return;
