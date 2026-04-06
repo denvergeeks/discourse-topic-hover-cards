@@ -16,13 +16,13 @@ en:
     enable_on_mobile_description: "Enable tap-to-preview behavior on touch devices."
 
     user_preference_field_name: "User preference field name"
-    user_preference_field_name_description: "The custom user field key used to disable hover cards per user. Supports direct keys (e.g. disable_topic_hover_cards), numeric IDs (e.g. 1), and user_field_X keys (e.g. user_field_1)."
+    user_preference_field_name_description: "Custom user field key used to disable hover cards per user. Supports direct keys (e.g. disable_topic_hover_cards), numeric IDs (e.g. 1), and user_field_X keys (e.g. user_field_1)."
 
     debug_mode: "Debug mode"
     debug_mode_description: "Log hover-card detection and user-field resolution details to the browser console for staff debugging."
 
     resolve_user_field_id_for_admins: "Resolve user field ID for admins"
-    resolve_user_field_id_for_admins_description: "When enabled, admins can configure the preference field by name or user_field_X; the component will use /admin/config/user-fields.json to resolve the numeric user-field ID."
+    resolve_user_field_id_for_admins_description: "When enabled, admins can configure the preference field by name or user_field_X; the component resolves the numeric user-field ID via /admin/config/user-fields.json."
 
     enable_on_topics: "Enable on topics"
     enable_on_topics_description: "Show hover cards for topic links inside the original post."
