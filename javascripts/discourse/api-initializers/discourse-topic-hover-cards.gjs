@@ -499,7 +499,7 @@ function buildCardHTML(topic, site, isMobile = false) {
       categoryHTML = `
         <span class="topic-hover-card__category">
           <span class="topic-hover-card__category-badge" style="--thc-category-color: ${color};">
-            ${name}
+            <span class="topic-hover-card__category-text">${name}</span>
           </span>
         </span>
       `;
@@ -516,7 +516,12 @@ function buildCardHTML(topic, site, isMobile = false) {
       tagsHTML = `
         <div class="topic-hover-card__tags">
           ${normalizedTags
-            .map((tag) => `<span class="topic-hover-card__tag">${tag}</span>`)
+            .map(
+              (tag) => `
+                <span class="topic-hover-card__tag">
+                  <span class="topic-hover-card__tag-text">${tag}</span>
+                </span>`
+            )
             .join("")}
         </div>
       `;
