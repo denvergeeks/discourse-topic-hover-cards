@@ -219,7 +219,6 @@ async function resolveUserFieldIdForAdmins(currentUser) {
       const match = fields.find((field) => {
         const id = field?.id;
         const name = String(field?.name || "").trim().toLowerCase();
-
         return (
           name === wanted ||
           `user_field_${id}` === wanted ||
@@ -595,7 +594,9 @@ function buildCardHTML(topic, site, isMobile = false) {
   if (showLikes) {
     const likes = topic.like_count ?? topic.topic_post_like_count ?? 0;
     statItems.push(
-      `<span class="topic-hover-card__stat">${dIconSVG("heart")} ${fmtNum(likes)}</span>`
+      `<span class="topic-hover-card__stat">${dIconSVG("heart")} ${fmtNum(
+        likes
+      )}</span>`
     );
   }
 
