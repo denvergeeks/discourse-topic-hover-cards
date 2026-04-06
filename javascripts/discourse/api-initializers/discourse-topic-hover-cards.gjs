@@ -109,14 +109,36 @@ function buildCardHTML(topic, isMobile = false) {
       : "";
 
   let categoryHTML = "";
-  if (topic.category_id) {
-    const name = topic.category_name ?? topic.category_slug ?? "";
+  if (settings.show_category && topic.category_id) {
+    const name =
+      topic.category_name ||
+      topic.category_slug ||
+      "Category";
+
     const color = topic.category_color
       ? `#${topic.category_color}`
-      : "var(--primary-medium)";
-    categoryHTML = `<div class="topic-hover-card__category">
-      <span class="badge-category" style="--category-badge-color:${color}">${name}</span>
-    </div>`;
+      : "var(--tertiary, var(--primary-medium))";
+
+    categoryHTML = `
+      <div class="topic-hover-card__category">
+        <span class="topic-hover-card__category-badge" style="--thc-category-color: ${color};">
+          ${name}
+        </span>
+      </div>
+    `;
+  }
+
+  let tagsHTML = "";
+  if (settings.show_tags && Array.isArray(topic.tags) && topic.tags.length) {
+    tagsHTML = `
+      <div class="topic-hover-card__tags">
+        ${topic.tags
+          .map(
+            (tag) => `<span class="topic-hover-card__tag">${tag}</span>`
+          )
+          .join("")}
+      </div>
+    `;
   }
 
   const title = topic.fancy_title ?? topic.title ?? "(no title)";
@@ -218,6 +240,7 @@ function buildCardHTML(topic, isMobile = false) {
 
   const bodyInner = `
       ${categoryHTML}
+      ${tagsHTML}
       ${titleHTML}
       ${excerpt}
       ${metadata}
