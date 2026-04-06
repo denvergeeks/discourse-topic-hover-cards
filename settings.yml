@@ -1,6 +1,7 @@
-# =========================
-# General
-# =========================
+section_general:
+  type: string
+  default: "──────── General ────────"
+  description: "Section label only."
 
 card_width:
   type: string
@@ -37,11 +38,12 @@ debug_mode:
 resolve_user_field_id_for_admins:
   type: bool
   default: true
-  description: "Allow admins to resolve the configured custom user field name to its numeric ID via /admin/config/user-fields.json, which helps match user_field_X payload keys."
+  description: "Allow admins to resolve the configured custom user field name to its numeric ID via /admin/config/user-fields.json."
 
-# =========================
-# Link locations
-# =========================
+section_link_locations:
+  type: string
+  default: "──────── Link locations ────────"
+  description: "Section label only."
 
 enable_on_topics:
   type: bool
@@ -63,19 +65,15 @@ enable_on_suggested_topic_links:
   default: true
   description: "Show hover cards for internal topic links in the suggested topics section."
 
-# =========================
-# Thumbnail and layout
-# =========================
+section_desktop_layout:
+  type: string
+  default: "──────── Desktop layout ────────"
+  description: "Section label only."
 
 show_thumbnail:
   type: bool
   default: true
   description: "Display the topic thumbnail image on desktop."
-
-show_thumbnail_mobile:
-  type: bool
-  default: true
-  description: "Display the topic thumbnail image on mobile."
 
 thumbnail_placement:
   type: enum
@@ -85,7 +83,7 @@ thumbnail_placement:
     - left
     - right
     - bottom
-  description: "Choose where the thumbnail appears on desktop. On mobile, the thumbnail is always rendered above the content."
+  description: "Choose where the thumbnail appears on desktop."
 
 image_size_percent:
   type: integer
@@ -94,10 +92,6 @@ image_size_percent:
   max: 60
   description: "For desktop left and right thumbnail layouts, sets the image width as a percentage of the hover card width."
 
-# =========================
-# Density
-# =========================
-
 density:
   type: enum
   default: default
@@ -105,20 +99,17 @@ density:
     - default
     - cozy
     - compact
-  description: "Desktop hover card density. Matches the relative options used by Discourse Density Toggle: default, cozy, and compact."
+  description: "Desktop hover card density. Matches Discourse Density Toggle naming."
 
-density_mobile:
-  type: enum
-  default: default
-  choices:
-    - default
-    - cozy
-    - compact
-  description: "Mobile hover card density. Matches the relative options used by Discourse Density Toggle: default, cozy, and compact."
+section_mobile_layout:
+  type: string
+  default: "──────── Mobile sheet ────────"
+  description: "Section label only."
 
-# =========================
-# Mobile sheet
-# =========================
+show_thumbnail_mobile:
+  type: bool
+  default: true
+  description: "Display the topic thumbnail image on mobile."
 
 mobile_width_percent:
   type: integer
@@ -134,49 +125,39 @@ mobile_thumbnail_height:
   max: 320
   description: "Controls the thumbnail height in pixels for the mobile bottom-sheet preview."
 
-# =========================
-# Content visibility
-# =========================
+density_mobile:
+  type: enum
+  default: default
+  choices:
+    - default
+    - cozy
+    - compact
+  description: "Mobile hover card density. Matches Discourse Density Toggle naming."
+
+section_desktop_content:
+  type: string
+  default: "──────── Desktop content ────────"
+  description: "Section label only."
 
 show_category:
   type: bool
   default: true
   description: "Display the topic category badge on desktop when category data is available."
 
-show_category_mobile:
-  type: bool
-  default: true
-  description: "Display the topic category badge on mobile when category data is available."
-
 show_tags:
   type: bool
   default: true
   description: "Display topic tags on desktop when tag data is available."
-
-show_tags_mobile:
-  type: bool
-  default: true
-  description: "Display topic tags on mobile when tag data is available."
 
 show_title:
   type: bool
   default: true
   description: "Display the topic title on desktop."
 
-show_title_mobile:
-  type: bool
-  default: true
-  description: "Display the topic title on mobile."
-
 show_excerpt:
   type: bool
   default: true
   description: "Display a cleaned text excerpt from the topic on desktop."
-
-show_excerpt_mobile:
-  type: bool
-  default: true
-  description: "Display a cleaned text excerpt from the topic on mobile."
 
 excerpt_length:
   type: integer
@@ -185,6 +166,31 @@ excerpt_length:
   max: 12
   description: "Number of excerpt lines to show on desktop."
 
+section_mobile_content:
+  type: string
+  default: "──────── Mobile content ────────"
+  description: "Section label only."
+
+show_category_mobile:
+  type: bool
+  default: true
+  description: "Display the topic category badge on mobile when category data is available."
+
+show_tags_mobile:
+  type: bool
+  default: true
+  description: "Display topic tags on mobile when tag data is available."
+
+show_title_mobile:
+  type: bool
+  default: true
+  description: "Display the topic title on mobile."
+
+show_excerpt_mobile:
+  type: bool
+  default: true
+  description: "Display a cleaned text excerpt from the topic on mobile."
+
 excerpt_length_mobile:
   type: integer
   default: 2
@@ -192,60 +198,70 @@ excerpt_length_mobile:
   max: 12
   description: "Number of excerpt lines to show on mobile."
 
+section_metadata_desktop:
+  type: string
+  default: "──────── Desktop metadata and stats ────────"
+  description: "Section label only."
+
 show_op:
   type: bool
   default: true
   description: "Display the original poster avatar and username in the metadata row on desktop."
-
-show_op_mobile:
-  type: bool
-  default: true
-  description: "Display the original poster avatar and username in the metadata row on mobile."
 
 show_publish_date:
   type: bool
   default: true
   description: "Display the topic creation date on desktop."
 
-show_publish_date_mobile:
-  type: bool
-  default: true
-  description: "Display the topic creation date on mobile."
-
 show_views:
   type: bool
   default: true
   description: "Display the topic view count on desktop."
-
-show_views_mobile:
-  type: bool
-  default: true
-  description: "Display the topic view count on mobile."
 
 show_reply_count:
   type: bool
   default: true
   description: "Display the topic reply count on desktop."
 
-show_reply_count_mobile:
-  type: bool
-  default: true
-  description: "Display the topic reply count on mobile."
-
 show_likes:
   type: bool
   default: true
   description: "Display the topic like count on desktop."
 
-show_likes_mobile:
-  type: bool
-  default: true
-  description: "Display the topic like count on mobile."
-
 show_activity:
   type: bool
   default: true
   description: "Display the most recent topic activity date on desktop."
+
+section_metadata_mobile:
+  type: string
+  default: "──────── Mobile metadata and stats ────────"
+  description: "Section label only."
+
+show_op_mobile:
+  type: bool
+  default: true
+  description: "Display the original poster avatar and username in the metadata row on mobile."
+
+show_publish_date_mobile:
+  type: bool
+  default: true
+  description: "Display the topic creation date on mobile."
+
+show_views_mobile:
+  type: bool
+  default: true
+  description: "Display the topic view count on mobile."
+
+show_reply_count_mobile:
+  type: bool
+  default: true
+  description: "Display the topic reply count on mobile."
+
+show_likes_mobile:
+  type: bool
+  default: true
+  description: "Display the topic like count on mobile."
 
 show_activity_mobile:
   type: bool
