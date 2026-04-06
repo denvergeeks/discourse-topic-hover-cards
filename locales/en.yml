@@ -39,6 +39,9 @@ en:
     image_size_percent: "Image size percent"
     image_size_percent_description: "For desktop left and right thumbnail layouts, sets the image width as a percentage of the hover card width."
 
+    mobile_width_percent: "Mobile width percent"
+    mobile_width_percent_description: "Controls the mobile preview width as a percentage of the viewport width."
+
     mobile_thumbnail_height: "Mobile thumbnail height"
     mobile_thumbnail_height_description: "Controls the thumbnail height in pixels for the mobile bottom-sheet preview."
 
