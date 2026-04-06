@@ -110,3 +110,6 @@ en:
 
     show_activity_mobile: "Show last activity on mobile"
     show_activity_mobile_description: "Display the most recent topic activity date on mobile."
+
+    user_preference_field_name: "User preference field name"
+    user_preference_field_name_description: "The custom user field key used to disable hover cards per user."
