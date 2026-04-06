@@ -1,34 +1,42 @@
-# -------------------------------------------------------
-# Discourse Topic Hover Cards — Settings
-# -------------------------------------------------------
-
-# --- Card dimensions ---
 card_width:
   type: string
-  default: 32rem
-  description: "Any valid CSS width, e.g. 420px, 32rem, 40vw, clamp(18rem, 40vw, 28rem)."
+  default: "32rem"
 
 card_max_height:
   type: string
-  default: 10rem
-  description: "Any valid CSS max-height, e.g. 480px, 60vh, 32rem, min(70vh, 560px)."
+  default: "10rem"
 
-# --- Behaviour ---
 card_delay_ms:
   type: integer
   default: 300
-  description: "Delay in milliseconds before the hover card appears."
 
 enable_on_mobile:
   type: bool
   default: false
-  description: "Enable tap-to-preview behavior on touch devices."
 
-# --- Card sections ---
+enable_on_topics:
+  type: bool
+  default: true
+
+enable_on_replies:
+  type: bool
+  default: true
+
+enable_on_topic_lists:
+  type: bool
+  default: true
+
+enable_on_suggested_topic_links:
+  type: bool
+  default: true
+
 show_thumbnail:
   type: bool
   default: true
-  description: "Display the topic thumbnail image when available."
+
+show_thumbnail_mobile:
+  type: bool
+  default: true
 
 thumbnail_placement:
   type: enum
@@ -38,91 +46,107 @@ thumbnail_placement:
     - left
     - right
     - bottom
-  description: "Choose where the thumbnail appears on desktop. On mobile, the thumbnail is always shown at the top."
 
 image_size_percent:
   type: integer
   default: 30
   min: 15
   max: 60
-  description: "The thumbnail size as % of the Hover Card width. Valid range is 15 to 60. (For left and right thumbnail placements. Top and bottom placements are fixed at 100%)."
 
-show_title:
-  type: bool
-  default: true
-  description: "Display the topic title inside the card."
+image_size_percent_mobile:
+  type: integer
+  default: 100
+  min: 15
+  max: 100
 
 show_category:
   type: bool
   default: true
-  description: "Display the topic category in the hover card."
+
+show_category_mobile:
+  type: bool
+  default: true
 
 show_tags:
   type: bool
   default: true
-  description: "Display topic tags in the hover card when tags are present."
+
+show_tags_mobile:
+  type: bool
+  default: true
+
+show_title:
+  type: bool
+  default: true
+
+show_title_mobile:
+  type: bool
+  default: true
 
 show_excerpt:
   type: bool
   default: true
-  description: "Display a cleaned excerpt from the topic, excluding image metadata and captions."
+
+show_excerpt_mobile:
+  type: bool
+  default: true
 
 excerpt_length:
   type: integer
   default: 3
   min: 1
   max: 12
-  description: "The number of lines for the excerpt. Valid range is 1 to 12."
+
+excerpt_length_mobile:
+  type: integer
+  default: 2
+  min: 1
+  max: 12
 
 show_op:
   type: bool
   default: true
-  description: "Display the original poster avatar and username."
 
-# --- Metadata row ---
+show_op_mobile:
+  type: bool
+  default: true
+
 show_publish_date:
   type: bool
   default: true
-  description: "Display the topic creation date."
+
+show_publish_date_mobile:
+  type: bool
+  default: true
 
 show_views:
   type: bool
   default: true
-  description: "Display the topic view count."
+
+show_views_mobile:
+  type: bool
+  default: true
 
 show_reply_count:
   type: bool
   default: true
-  description: "Display the topic reply count."
+
+show_reply_count_mobile:
+  type: bool
+  default: true
 
 show_likes:
   type: bool
   default: true
-  description: "Display the topic like count."
+
+show_likes_mobile:
+  type: bool
+  default: true
 
 show_activity:
   type: bool
   default: true
-  description: "Display the most recent topic activity date."
 
-# --- Enabled on ---
-
-enable_on_topics:
+show_activity_mobile:
   type: bool
-  default: true
-  description: "Show hover cards for topic links inside the original post."
-
-enable_on_replies:
-  type: bool
-  default: true
-  description: "Show hover cards for topic links inside replies."
-
-enable_on_topic_lists:
-  type: bool
-  default: true
-  description: "Show hover cards for topic links in topic lists."
-
-enable_on_suggested_topic_links:
-  type: bool
-  default: true
-  description: "Show hover cards for links in the suggested topics section."
+  default: false
