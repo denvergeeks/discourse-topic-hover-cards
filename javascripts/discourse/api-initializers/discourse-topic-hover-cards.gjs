@@ -91,7 +91,6 @@ function findCategoryById(site, categoryId) {
   if (!site || !categoryId) return null;
 
   const categories = site.categoriesList?.categories || site.categories || [];
-
   return categories.find((c) => Number(c.id) === Number(categoryId)) || null;
 }
 
@@ -200,8 +199,10 @@ async function resolveUserFieldIdForAdmins(currentUser) {
       const wanted = String(USER_PREFERENCE_FIELD_NAME).trim().toLowerCase();
 
       const match = fields.find((field) => {
-        const name = String(field?.name || "").trim().toLowerCase();
-        return name === wanted;
+        const fieldName = String(field?.name || "").trim().toLowerCase();
+        const userFieldKey = `user_field_${field?.id}`.toLowerCase();
+
+        return fieldName === wanted || userFieldKey === wanted;
       });
 
       resolvedUserFieldId = match?.id ?? null;
@@ -209,6 +210,8 @@ async function resolveUserFieldIdForAdmins(currentUser) {
       debugLog("Resolved admin user-field mapping", {
         configuredField: USER_PREFERENCE_FIELD_NAME,
         resolvedUserFieldId,
+        resolvedUserFieldKey:
+          resolvedUserFieldId !== null ? `user_field_${resolvedUserFieldId}` : null,
       });
 
       return resolvedUserFieldId;
@@ -254,7 +257,9 @@ async function hoverCardsDisabledForUser(currentUser) {
   const resolvedId = await resolveUserFieldIdForAdmins(currentUser);
 
   if (resolvedId) {
-    const resolvedCandidates = normalizedFieldKeyVariants(resolvedId);
+    const resolvedCandidates = normalizedFieldKeyVariants(
+      `user_field_${resolvedId}`
+    );
 
     match =
       findTruthyFieldMatch(customFields, resolvedCandidates) ||
@@ -399,7 +404,6 @@ function buildCardHTML(topic, site, isMobile = false) {
   }
 
   const title = topic.fancy_title ?? topic.title ?? "(no title)";
-
   const titleHTML = showTitle
     ? `<div class="topic-hover-card__title">${title}</div>`
     : "";
@@ -641,10 +645,7 @@ export default apiInitializer((api) => {
       const vw = window.innerWidth;
       const vh = window.innerHeight;
       const cardH = tooltip.offsetHeight || 320;
-      const cardW = Math.min(
-        tooltip.offsetWidth || 512,
-        vw - VIEWPORT_MARGIN * 2
-      );
+      const cardW = Math.min(tooltip.offsetWidth || 512, vw - VIEWPORT_MARGIN * 2);
 
       let top = anchorRect.bottom + 10;
       let isAbove = false;
