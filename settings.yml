@@ -9,10 +9,16 @@ card_max_height:
 card_delay_ms:
   type: integer
   default: 300
+  min: 0
+  max: 5000
 
 enable_on_mobile:
   type: bool
   default: false
+
+user_preference_field_name:
+  type: string
+  default: "disable_topic_hover_cards"
 
 enable_on_topics:
   type: bool
@@ -156,7 +162,3 @@ show_activity:
 show_activity_mobile:
   type: bool
   default: false
-
-user_preference_field_name:
-  type: string
-  default: "disable_topic_hover_cards"
