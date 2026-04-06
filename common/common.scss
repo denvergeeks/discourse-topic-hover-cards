@@ -368,6 +368,33 @@
   text-overflow: ellipsis;
 }
 
+@media (max-width: 767px) and (any-hover: hover) and (any-pointer: fine) {
+  .topic-hover-card-tooltip {
+    left: auto !important;
+    right: auto !important;
+    bottom: auto !important;
+    top: auto !important;
+    transform: translate3d(0, 4px, 0);
+    max-width: var(--thc-width, 32rem);
+    width: 100%;
+    padding: 0;
+  }
+
+  .topic-hover-card-tooltip.is-visible {
+    transform: translate3d(0, 0, 0);
+  }
+
+  .topic-hover-card {
+    max-height: var(--thc-max-h, 10rem);
+    border-bottom-left-radius: 0.75rem;
+    border-bottom-right-radius: 0.75rem;
+  }
+
+  .topic-hover-card__thumbnail img {
+    max-height: none;
+  }
+}
+
 @supports not ((mask-image: linear-gradient(#000, transparent))) {
   .topic-hover-card__badges {
     -webkit-mask-image: none;
