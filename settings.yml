@@ -41,6 +41,7 @@ image_size_percent:
   default: 30
   min: 15
   max: 60
+  description: "Size as % of the Hover Card width. (For left and right thumbnail placements. Top and bottom placements are fixed at 100%)."
 
 show_title:
   type: bool
