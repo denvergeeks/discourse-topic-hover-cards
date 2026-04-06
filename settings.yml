@@ -1,6 +1,6 @@
-section_general:
-  type: enum
-  default: "──────── GENERAL SETTINGS ────────"
+GENERAL_SETTINGS:
+  type: string
+  default: "────────────────────────"
 
 card_width:
   type: string
