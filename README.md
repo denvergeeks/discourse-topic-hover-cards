@@ -131,7 +131,7 @@ For each block below, you have both desktop and mobile toggles:
 
 ## Per-user opt-out
 
-You can let individual users disable hover cards using a **custom user field**. This uses the standard theme-settings mechanism and current-user data access described in the developer guides. [web:22][web:876]
+You can let individual users disable hover cards using a **custom user field**. This uses the standard theme-settings mechanism and current-user data access described in the developer guides.
 
 - **user_preference_field_name**  
   The key used to detect opt-out on the current user. This can be:
