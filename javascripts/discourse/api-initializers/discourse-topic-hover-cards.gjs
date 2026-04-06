@@ -17,15 +17,15 @@ const VIEWPORT_MARGIN = 12;
 const TOPIC_LINK_RE = /\/t\/(?:[^/]+\/)?([0-9]+)(?:\/[0-9]+)?/;
 
 function isTouchDevice() {
-  return (
-    "ontouchstart" in window ||
-    navigator.maxTouchPoints > 0 ||
-    navigator.msMaxTouchPoints > 0
-  );
+  return window.matchMedia("(hover: none) and (pointer: coarse)").matches;
 }
 
 function isMobileView() {
-  return isTouchDevice();
+  const hasHover =
+    window.matchMedia("(any-hover: hover)").matches ||
+    window.matchMedia("(hover: hover)").matches;
+
+  return !hasHover;
 }
 
 async function getJSON(url) {
@@ -454,7 +454,7 @@ function buildCardHTML(topic, site, isMobile = false) {
     isMobile
   );
 
-  const excerptLines = mobileInt(
+  const excerptLength = mobileInt(
     "excerpt_length",
     "excerpt_length_mobile",
     3,
@@ -556,7 +556,7 @@ function buildCardHTML(topic, site, isMobile = false) {
 
   const excerpt =
     showExcerpt && finalExcerpt
-      ? `<div class="topic-hover-card__excerpt" style="--thc-excerpt-lines:${excerptLines};">${finalExcerpt}</div>`
+      ? `<div class="topic-hover-card__excerpt" style="--thc-excerpt-lines:${excerptLength};">${finalExcerpt}</div>`
       : "";
 
   let opHTML = "";
