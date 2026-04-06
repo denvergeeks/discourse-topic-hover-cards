@@ -131,8 +131,12 @@
 .topic-hover-card--density-default {
   .topic-hover-card__body {
     padding: 0.55rem 0.7rem;
-    gap: 0.2rem;
+    gap: 0.18rem;
     font-size: var(--font-down-1);
+  }
+
+  .topic-hover-card__excerpt {
+    line-height: 1.22;
   }
 }
 
@@ -158,7 +162,7 @@
 
   .topic-hover-card__excerpt {
     -webkit-line-clamp: 2;
-    line-height: 1.2;
+    line-height: 1.18;
   }
 
   .topic-hover-card__metadata,
@@ -199,7 +203,7 @@
 
 .topic-hover-card__excerpt {
   font-size: 1em;
-  line-height: 1.3;
+  line-height: 1.26;
   color: var(--primary-medium, $primary-medium);
   display: -webkit-box;
   -webkit-line-clamp: var(--thc-excerpt-lines, 2);
@@ -313,6 +317,12 @@
   border-radius: 999px;
   background: var(--thc-category-color, var(--tertiary, $tertiary));
   color: var(--secondary, $secondary);
+}
+
+.topic-hover-card__category-text {
+  display: block;
+  min-width: 0;
+  max-width: 100%;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -334,12 +344,18 @@
   flex: 0 1 auto;
   min-width: 0;
   max-width: 100%;
-  font-size: 1em;
-  line-height: 1;
   padding: 0.12rem 0.32rem;
   border-radius: 999px;
   background: var(--primary-low, $primary-low);
   color: var(--primary, $primary);
+}
+
+.topic-hover-card__tag-text {
+  display: block;
+  min-width: 0;
+  max-width: 100%;
+  font-size: 1em;
+  line-height: 1;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
