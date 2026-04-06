@@ -1,8 +1,8 @@
 {
-  "name": "Discourse Topic Hover Cards",
+  "name": "Topic Hover Cards",
   "component": true,
   "authors": "@denvergeeks",
-  "about_url": "https://github.com/denvergeeks/discourse-topic-hover-cards",
+  "about_url": "https://github.com/denvergeeks/discourse-topic-hover-cards/blob/main/README.md",
   "license_url": "https://github.com/denvergeeks/discourse-topic-hover-cards/blob/main/LICENSE",
   "theme_version": "0.1.0",
   "minimum_discourse_version": "3.4.0"
