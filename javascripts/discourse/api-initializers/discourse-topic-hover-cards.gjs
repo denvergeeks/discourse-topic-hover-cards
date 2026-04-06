@@ -924,19 +924,31 @@ export default apiInitializer((api) => {
       return false;
     }
 
-    function onMouseEnter(event) {
-      if (isMobileView()) return;
+function onMouseEnter(event) {
+  const link = event.target.closest("a[href]");
 
-      const link = event.target.closest("a[href]");
-      if (!link) return;
-// TEMP TEST
-// if (!linkInSupportedArea(link)) return;
+  console.log("THC onMouseEnter fired", {
+    mobile: isMobileView(),
+    hasLink: !!link,
+    href: link?.href || null,
+    bodyClasses: document.body.className,
+  });
 
-      const topicId = topicIdFromHref(link.href);
-      if (!topicId) return;
+  if (isMobileView()) return;
+  if (!link) return;
+  // if (!linkInSupportedArea(link)) return;
 
-      scheduleShow(topicId, link.getBoundingClientRect());
-    }
+  const topicId = topicIdFromHref(link.href);
+
+  console.log("THC after topicId check", {
+    topicId,
+    supportedArea: link ? linkInSupportedArea(link) : false,
+  });
+
+  if (!topicId) return;
+
+  scheduleShow(topicId, link.getBoundingClientRect());
+}
 
     function onMouseLeave(event) {
       if (isMobileView()) return;
