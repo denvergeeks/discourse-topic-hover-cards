@@ -36,6 +36,12 @@ thumbnail_placement:
     - right
     - bottom
 
+image_size_percent:
+  type: integer
+  default: 30
+  min: 15
+  max: 60
+
 show_title:
   type: bool
   default: true
