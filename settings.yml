@@ -53,6 +53,22 @@ thumbnail_placement:
     - right
     - bottom
 
+density:
+  type: enum
+  default: default
+  choices:
+    - default
+    - cozy
+    - compact
+
+density_mobile:
+  type: enum
+  default: default
+  choices:
+    - default
+    - cozy
+    - compact
+
 image_size_percent:
   type: integer
   default: 30
