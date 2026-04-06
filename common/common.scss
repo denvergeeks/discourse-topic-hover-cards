@@ -206,7 +206,7 @@
   line-height: 1.26;
   color: var(--primary-medium, $primary-medium);
   display: -webkit-box;
-  -webkit-line-clamp: var(--thc-excerpt-lines, 2);
+  -webkit-line-clamp: var(--thc-excerpt-lines, 3);
   -webkit-box-orient: vertical;
   text-overflow: ellipsis;
   word-break: break-word;
@@ -298,8 +298,16 @@
   mask-size: 100% 100%;
 }
 
+.topic-hover-card__category,
+.topic-hover-card__category-badge,
+.topic-hover-card__category-text,
+.topic-hover-card__tags,
+.topic-hover-card__tag,
+.topic-hover-card__tag-text {
+  font-size: var(--font-down-1);
+}
+
 .topic-hover-card__category {
-  font-size: 1em;
   display: inline-flex;
   align-items: center;
   flex: 0 1 auto;
@@ -354,7 +362,6 @@
   display: block;
   min-width: 0;
   max-width: 100%;
-  font-size: 1em;
   line-height: 1;
   white-space: nowrap;
   overflow: hidden;
