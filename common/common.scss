@@ -321,12 +321,8 @@
     }
   }
 
+.topic-hover-card {
   &--density-default {
-    .topic-hover-card__thumbnail {
-      height: 160px;
-      flex-basis: 160px;
-    }
-
     .topic-hover-card__body {
       padding: 0.75rem 1rem;
     }
@@ -362,11 +358,6 @@
   }
 
   &--density-cozy {
-    .topic-hover-card__thumbnail {
-      height: 144px;
-      flex-basis: 144px;
-    }
-
     .topic-hover-card__body {
       padding: 0.65rem 0.85rem;
     }
@@ -408,11 +399,6 @@
   }
 
   &--density-compact {
-    .topic-hover-card__thumbnail {
-      height: 128px;
-      flex-basis: 128px;
-    }
-
     .topic-hover-card__body {
       padding: 0.55rem 0.7rem;
     }
