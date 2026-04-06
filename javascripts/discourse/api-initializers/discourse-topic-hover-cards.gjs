@@ -17,15 +17,15 @@ const VIEWPORT_MARGIN = 12;
 const TOPIC_LINK_RE = /\/t\/(?:[^/]+\/)?([0-9]+)(?:\/[0-9]+)?/;
 
 function isTouchDevice() {
-  return window.matchMedia("(hover: none) and (pointer: coarse)").matches;
+  return (
+    "ontouchstart" in window ||
+    navigator.maxTouchPoints > 0 ||
+    navigator.msMaxTouchPoints > 0
+  );
 }
 
 function isMobileView() {
-  const hasFineHover = window.matchMedia(
-    "(any-hover: hover) and (any-pointer: fine)"
-  ).matches;
-
-  return !hasFineHover;
+  return isTouchDevice();
 }
 
 async function getJSON(url) {
