@@ -38,7 +38,7 @@ thumbnail_placement:
     - left
     - right
     - bottom
-    description: "Choose where the thumbnail appears on desktop. On mobile, the thumbnail is always shown at the top."
+  description: "Choose where the thumbnail appears on desktop. On mobile, the thumbnail is always shown at the top."
 
 image_size_percent:
   type: integer
