@@ -403,9 +403,32 @@ export default apiInitializer((api) => {
   }
 
   function linkInSupportedArea(link) {
-    return link.closest(
-      ".cooked, .topic-body, .topic-list, .suggested-topics, .timeline-container, .topic-map"
-    );
+    const inTopicList = !!link.closest(".topic-list");
+    const inSuggested = !!link.closest(".suggested-topics");
+    const post = link.closest(".topic-post");
+    const inPostCooked = !!link.closest(".topic-post .cooked");
+
+    if (inSuggested && settings.enable_on_suggested_topic_links) {
+      return true;
+    }
+
+    if (inTopicList && settings.enable_on_topic_lists) {
+      return true;
+    }
+
+    if (inPostCooked && post) {
+      const isFirstPost = post.classList.contains("topic-owner");
+
+      if (isFirstPost && settings.enable_on_topics) {
+        return true;
+      }
+
+      if (!isFirstPost && settings.enable_on_replies) {
+        return true;
+      }
+    }
+
+    return false;
   }
 
   function onMouseEnter(event) {
