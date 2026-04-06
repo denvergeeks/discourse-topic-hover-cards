@@ -53,7 +53,7 @@ function stripHtml(html) {
 
 function skeletonHTML() {
   return `
-    <div class="topic-hover-card">
+    <div class="topic-hover-card topic-hover-card--density-default">
       <div class="topic-hover-card__body">
         <div class="topic-hover-card__skeleton">
           <div class="skeleton-line title"></div>
@@ -114,6 +114,14 @@ function mobileInt(name, mobileName, fallback, isMobile) {
   return isMobile
     ? settings[mobileName] ?? settings[name] ?? fallback
     : settings[name] ?? fallback;
+}
+
+function densitySetting(isMobile) {
+  const value = isMobile
+    ? settings.density_mobile ?? settings.density ?? "default"
+    : settings.density ?? "default";
+
+  return ["default", "cozy", "compact"].includes(value) ? value : "default";
 }
 
 function fieldValueIsTruthy(value) {
@@ -198,6 +206,8 @@ function buildCardHTML(topic, site, isMobile = false) {
 
   const configuredPlacement = settings.thumbnail_placement || "left";
   const placement = isMobile ? "top" : configuredPlacement;
+  const density = densitySetting(isMobile);
+  const densityClass = `topic-hover-card--density-${density}`;
 
   const mobileCloseButton = isMobile
     ? `<button class="topic-hover-card__close" type="button" data-thc-close aria-label="Close preview">
@@ -381,7 +391,7 @@ function buildCardHTML(topic, site, isMobile = false) {
   switch (placement) {
     case "left":
       return `
-        <div class="topic-hover-card topic-hover-card--thumb-left" ${wrapperStyle}>
+        <div class="topic-hover-card topic-hover-card--thumb-left ${densityClass}" ${wrapperStyle}>
           ${thumbnail}
           <div class="topic-hover-card__body">
             ${bodyInner}
@@ -390,7 +400,7 @@ function buildCardHTML(topic, site, isMobile = false) {
 
     case "right":
       return `
-        <div class="topic-hover-card topic-hover-card--thumb-right" ${wrapperStyle}>
+        <div class="topic-hover-card topic-hover-card--thumb-right ${densityClass}" ${wrapperStyle}>
           ${thumbnail}
           <div class="topic-hover-card__body">
             ${bodyInner}
@@ -399,7 +409,7 @@ function buildCardHTML(topic, site, isMobile = false) {
 
     case "bottom":
       return `
-        <div class="topic-hover-card topic-hover-card--thumb-bottom" ${wrapperStyle}>
+        <div class="topic-hover-card topic-hover-card--thumb-bottom ${densityClass}" ${wrapperStyle}>
           <div class="topic-hover-card__body">
             ${bodyInner}
           </div>
@@ -409,7 +419,7 @@ function buildCardHTML(topic, site, isMobile = false) {
     case "top":
     default:
       return `
-        <div class="topic-hover-card topic-hover-card--thumb-top" ${wrapperStyle}>
+        <div class="topic-hover-card topic-hover-card--thumb-top ${densityClass}" ${wrapperStyle}>
           ${thumbnail}
           <div class="topic-hover-card__body">
             ${bodyInner}
@@ -550,7 +560,7 @@ export default apiInitializer((api) => {
         .catch(() => {
           if (currentTopicId === topicId) {
             tooltip.innerHTML =
-              `<div class="topic-hover-card"><div class="topic-hover-card__body"><div class="topic-hover-card__loading">Could not load topic.</div></div></div>`;
+              `<div class="topic-hover-card topic-hover-card--density-default"><div class="topic-hover-card__body"><div class="topic-hover-card__loading">Could not load topic.</div></div></div>`;
           }
         });
     }
