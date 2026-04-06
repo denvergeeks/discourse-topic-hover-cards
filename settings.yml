@@ -28,17 +28,17 @@ enable_on_mobile:
 user_preference_field_name:
   type: string
   default: "disable_topic_hover_cards"
-  description: "The custom user field key used to disable hover cards per user."
+  description: "Custom user field key used to disable hover cards per user. Supports direct keys (e.g. disable_topic_hover_cards), numeric IDs (e.g. 1), and user_field_X keys (e.g. user_field_1)."
 
 debug_mode:
   type: bool
   default: false
-  description: "Log hover-card field detection details to the browser console for staff debugging."
+  description: "Log hover-card detection and user-field resolution details to the browser console for staff debugging."
 
 resolve_user_field_id_for_admins:
   type: bool
   default: true
-  description: "When enabled, admins can fetch /admin/config/user-fields.json to map the configured user field name to its numeric user_field_ID key."
+  description: "When enabled, admins can configure the preference field by name or user_field_X; the component resolves the numeric user-field ID via /admin/config/user-fields.json."
 
 section_link_locations:
   type: string
@@ -58,22 +58,22 @@ enable_on_replies:
 enable_on_topic_lists:
   type: bool
   default: true
-  description: "Show hover cards for internal topic links shown in standard topic list views."
+  description: "Show hover cards for internal topic links shown in standard topic list views (Latest, Top, category topic lists, tags, etc.)."
 
 enable_on_category_homepage_topic_lists:
   type: bool
   default: true
-  description: "Show hover cards for internal topic links shown in topic-list areas on category homepage layouts, such as Categories and Latest Topics or Categories with Featured Topics."
+  description: "Show hover cards for internal topic links shown in topic-list areas on category homepage layouts, including Categories + Latest layouts rendered at / or /categories."
 
 enable_on_doc_categories:
   type: bool
   default: true
-  description: "Show hover cards for internal topic links inside Discourse Doc Categories views and navigation areas."
+  description: "Show hover cards for internal topic links inside Discourse Doc Categories views and navigation areas (when available)."
 
 enable_on_kanban_boards:
   type: bool
   default: true
-  description: "Show hover cards for internal topic links inside Discourse Kanban board cards and board views."
+  description: "Show hover cards for internal topic links inside Discourse Kanban board cards and board views (when available)."
 
 enable_on_suggested_topic_links:
   type: bool
@@ -82,7 +82,7 @@ enable_on_suggested_topic_links:
 
 section_content:
   type: string
-  default: "──────── Content ────────"
+  default: "──────── Content & layout ────────"
   description: "Section label only."
 
 show_thumbnail:
