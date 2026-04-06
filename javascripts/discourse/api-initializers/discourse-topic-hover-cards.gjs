@@ -118,22 +118,33 @@ function mobileInt(name, mobileName, fallback, isMobile) {
 
 function fieldValueIsTruthy(value) {
   if (value === true || value === 1) return true;
+
   if (typeof value === "string") {
     const normalized = value.trim().toLowerCase();
     return ["1", "true", "yes", "on", "checked"].includes(normalized);
   }
+
   return false;
 }
 
 function hoverCardsDisabledForUser(currentUser) {
   if (!currentUser || !USER_PREFERENCE_FIELD_NAME) return false;
 
-  const fields =
-    currentUser.custom_fields ||
-    currentUser.user_fields ||
-    {};
+  const customFieldValue =
+    currentUser?.custom_fields?.[USER_PREFERENCE_FIELD_NAME];
 
-  return fieldValueIsTruthy(fields[USER_PREFERENCE_FIELD_NAME]);
+  if (fieldValueIsTruthy(customFieldValue)) {
+    return true;
+  }
+
+  const directUserFieldValue =
+    currentUser?.user_fields?.[USER_PREFERENCE_FIELD_NAME];
+
+  if (fieldValueIsTruthy(directUserFieldValue)) {
+    return true;
+  }
+
+  return false;
 }
 
 function buildCardHTML(topic, site, isMobile = false) {
@@ -253,7 +264,8 @@ function buildCardHTML(topic, site, isMobile = false) {
     : "";
 
   const firstPost = topic.post_stream?.posts?.[0];
-  const excerptSource = topic.excerpt || firstPost?.excerpt || firstPost?.cooked || "";
+  const excerptSource =
+    topic.excerpt || firstPost?.excerpt || firstPost?.cooked || "";
   const cleanedExcerpt = stripHtml(excerptSource);
   const finalExcerpt = cleanedExcerpt.length >= 20 ? cleanedExcerpt : "";
 
@@ -408,7 +420,8 @@ function buildCardHTML(topic, site, isMobile = false) {
 
 export default apiInitializer((api) => {
   const site = api.container.lookup("service:site");
-  const currentUser = api.getCurrentUser?.() || api.container.lookup("service:current-user");
+  const currentUser =
+    api.getCurrentUser?.() || api.container.lookup("service:current-user");
   const onMobile = site.mobileView || isTouchDevice();
 
   if (hoverCardsDisabledForUser(currentUser)) {
@@ -482,7 +495,10 @@ export default apiInitializer((api) => {
     const vw = window.innerWidth;
     const vh = window.innerHeight;
     const cardH = tooltip.offsetHeight || 320;
-    const cardW = Math.min(tooltip.offsetWidth || 512, vw - VIEWPORT_MARGIN * 2);
+    const cardW = Math.min(
+      tooltip.offsetWidth || 512,
+      vw - VIEWPORT_MARGIN * 2
+    );
 
     let top = anchorRect.bottom + 10;
     let isAbove = false;
@@ -500,8 +516,8 @@ export default apiInitializer((api) => {
     }
     left = Math.max(VIEWPORT_MARGIN, left);
 
-    tooltip.style.top = top + "px";
-    tooltip.style.left = left + "px";
+    tooltip.style.top = `${top}px`;
+    tooltip.style.left = `${left}px`;
     tooltip.classList.toggle("is-above", isAbove);
   }
 
@@ -664,7 +680,11 @@ export default apiInitializer((api) => {
   document.addEventListener(
     "scroll",
     (event) => {
-      if (event.target?.closest?.(".topic-hover-card, .topic-hover-card-tooltip")) {
+      if (
+        event.target?.closest?.(
+          ".topic-hover-card, .topic-hover-card-tooltip"
+        )
+      ) {
         return;
       }
 
