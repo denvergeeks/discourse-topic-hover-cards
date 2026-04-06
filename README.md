@@ -129,7 +129,7 @@ For each block below, you have both desktop and mobile toggles:
   Topic links in the “latest topics” or equivalent lists on the **categories homepage**:
   - Categories + Latest Topics
   - Categories-only
-  - Related variants rendered at `/` or `/categories`, depending on how your homepage is configured. [web:807][web:922]
+  - Related variants rendered at `/` or `/categories`, depending on how your homepage is configured.
 
 - **enable_on_doc_categories**  
   Topic links in **Doc Categories** views (when applicable).
@@ -208,7 +208,7 @@ To debug **where** the card should appear, check that:
   - `enable_on_kanban_boards`
   - `enable_on_suggested_topic_links`
 
-The component’s runtime logic uses the modern JS API initializer pattern described in the **Theme Developer Tutorial: Using the JS API**, and the recommended `service:site` / `service:store` access patterns. [web:827][web:873]
+The component’s runtime logic uses the modern JS API initializer pattern described in the **Theme Developer Tutorial: Using the JS API**, and the recommended `service:site` / `service:store` access patterns.
 
 ---
 
@@ -218,4 +218,3 @@ The component’s runtime logic uses the modern JS API initializer pattern descr
 - **Themes:** Intended as a theme component; add it to any theme where you want hover cards.
 - **Other components:** If you also customize homepage content (e.g. custom Categories + Latest implementations, Doc Categories, or Kanban components), ensure their CSS does not hide `.topic-hover-card-tooltip` or block pointer events on links.
 
-For more on theme/component structure and git-based workflows, see: [Structure of themes and theme components](https://meta.discourse.org/t/structure-of-themes-and-theme-components/60848) and the theme developer tutorials. [web:409][web:645]
