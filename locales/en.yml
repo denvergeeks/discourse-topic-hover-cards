@@ -1,6 +1,6 @@
 en:
   theme_metadata:
-    description: "Shows topic cards as hover tooltips inside topics, replies, topic lists, and suggested topic links."
+    description: "Shows topic cards as hover tooltips inside (optionally) topics, replies, topic lists, and suggested topic links."
 
   settings:
     card_width: "Card width"
@@ -20,6 +20,9 @@ en:
 
     thumbnail_placement: "Thumbnail placement"
     thumbnail_placement_description: "Choose where the thumbnail appears on desktop. On mobile, the thumbnail is always shown at the top."
+
+    image_size_percent: "Thumbnail size
+    image_size_percent_description: "The thumbnail size as % of the Hover Card width. Valid range is 15 to 60. (For left and right thumbnail placements. Top and bottom placements are fixed at 100%)."
 
     show_title: "Show topic title"
     show_title_description: "Display the topic title inside the card."
