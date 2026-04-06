@@ -70,6 +70,11 @@
   &--thumb-top,
   &--thumb-bottom {
     flex-direction: column;
+
+    .topic-hover-card__thumbnail {
+      height: 160px;
+      flex: 0 0 160px;
+    }
   }
 
   &--thumb-left,
@@ -321,7 +326,6 @@
     }
   }
 
-.topic-hover-card {
   &--density-default {
     .topic-hover-card__body {
       padding: 0.75rem 1rem;
