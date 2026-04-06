@@ -69,7 +69,7 @@
     0 4px 16px rgba(0, 0, 0, 0.12),
     0 1px 4px rgba(0, 0, 0, 0.08);
   overflow: hidden;
-  font-size: var(--font-down-1-rem);
+  font-size: var(--font-down-2-rem);
 
   &--thumb-top,
   &--thumb-bottom {
@@ -90,7 +90,7 @@
     .topic-hover-card__body {
       flex: 1 1 auto;
       min-width: 0;
-      padding: 0.7rem 0.85rem;
+      padding: 0.5rem 0.85rem;
     }
   }
 
