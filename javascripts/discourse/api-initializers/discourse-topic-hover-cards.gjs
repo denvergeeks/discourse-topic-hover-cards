@@ -705,6 +705,8 @@ function buildCardHTML(topic, site, isMobile = false) {
 }
 
 export default apiInitializer((api) => {
+  console.log("THC initializer loaded");
+
   const site = api.container.lookup("service:site");
   const currentUser =
     api.getCurrentUser?.() || api.container.lookup("service:current-user");
