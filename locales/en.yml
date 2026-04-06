@@ -15,6 +15,9 @@ en:
     enable_on_mobile: "Enable on mobile"
     enable_on_mobile_description: "Enable tap-to-preview behavior on touch devices."
 
+    user_preference_field_name: "User preference field name"
+    user_preference_field_name_description: "The custom user field key used to disable hover cards per user."
+
     enable_on_topics: "Enable on topics"
     enable_on_topics_description: "Show hover cards for topic links inside the original post."
 
@@ -110,6 +113,3 @@ en:
 
     show_activity_mobile: "Show last activity on mobile"
     show_activity_mobile_description: "Display the most recent topic activity date on mobile."
-
-    user_preference_field_name: "User preference field name"
-    user_preference_field_name_description: "The custom user field key used to disable hover cards per user."
