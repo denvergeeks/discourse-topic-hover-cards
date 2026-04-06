@@ -1,305 +1,156 @@
 # Discourse Topic Hover Cards
 
-A Discourse theme component that shows rich topic preview cards when users interact with internal topic links.
-
-This component was inspired by the idea behind topic cards, but instead of changing the main topic list layout, it displays a compact preview card anywhere supported topic links appear across your forum.
+A Discourse theme component that shows rich preview cards for internal topic links across topics, replies, topic lists, and suggested topics.
 
 ## Features
 
-- Show a topic preview card for internal topic links
-- Works in configurable areas:
-  - Topics
-  - Replies
-  - Topic lists
-  - Suggested topic links
-- Optional display of:
-  - Thumbnail
-  - Category
-  - Tags
-  - Title
-  - Excerpt
-  - Original poster
-  - Publish date
-  - Views
-  - Reply count
-  - Likes
-  - Last activity
-- Desktop thumbnail placement options:
-  - Top
-  - Left
-  - Right
-  - Bottom
-- Desktop thumbnail width control
-- Mobile thumbnail height control
-- Configurable excerpt length
-- Configurable card width and max height using valid CSS values
-- Mobile-specific display settings
-- In-memory caching for faster repeat previews
-- Desktop viewport-aware positioning above or below the hovered link
-- Mobile bottom-sheet preview with explicit close and open controls
+- Rich hover preview cards for internal topic links
+- Desktop hover support
+- Optional mobile tap-to-preview bottom sheet
+- Configurable desktop width and max height
+- Configurable mobile width and thumbnail height
+- Configurable desktop thumbnail placement
+- Separate desktop/mobile content visibility settings
+- Per-user disable toggle via custom user field
+- Topic JSON fetch caching for repeated previews
 
 ## Installation
 
-Install this as a remote theme component in Discourse:
+In Discourse Admin:
 
-1. Go to **Admin → Appearance → Themes & components**. [web:366]
-2. Open the **Components** tab. [web:366]
-3. Click **Install**. [web:366]
-4. Choose **From a git repository**. [web:366]
-5. Paste this repository URL.
-6. Install the component.
-7. Add the component to one or more active themes using either:
-   - the component’s **Include component on these themes** setting, or
-   - the theme’s **Included components** section. [web:366][web:89]
+1. Go to **Admin → Appearance → Themes & Components**
+2. Open the **Components** tab
+3. Click **Install**
+4. Choose **From a git repository**
+5. Enter the repository URL
+6. Install the component
+7. Add the component to your active theme via **Include component on these themes**
 
-## How it works
-
-The component watches supported internal topic links and fetches topic JSON from Discourse when a preview is needed. It then builds a preview card using topic data and Discourse’s client-side category information, which is a normal pattern for Discourse theme components built with repository files, settings, styles, and JS initializers. [web:365][web:409]
-
-On desktop, the card appears as a floating tooltip near the hovered link. On mobile, the card opens as a bottom sheet after tapping a supported internal topic link. [web:317][web:389]
-
-## Desktop behavior
-
-On desktop, when a user hovers over a supported internal topic link, the component displays a floating preview card near that link.
-
-Desktop behavior includes:
-
-- Hover delay before opening
-- Automatic placement above or below the link depending on available viewport space
-- Horizontal clamping so the card does not render off-screen
-- Configurable thumbnail placement
-- Configurable thumbnail width percentage for left and right layouts
-- Rich metadata display based on enabled settings
-
-## Mobile behavior
-
-When mobile support is enabled, the component uses a dedicated mobile preview interaction instead of desktop hover behavior.
-
-Mobile behavior includes:
-
-- Tap a supported internal topic link to open the preview
-- Preview opens as a bottom sheet anchored to the bottom of the screen
-- A red close button appears in the top-right corner of the preview
-- A full-width **Open topic** button appears at the bottom of the preview
-- Tapping inside the preview does not navigate unless the user taps **Open topic**
-- Thumbnail placement is always top-aligned on mobile
-- Thumbnail size on mobile is controlled by a dedicated mobile thumbnail-height setting
-- Mobile-specific content visibility settings allow a lighter or denser mobile layout
+Discourse supports installing theme components directly from git repositories. After installation, add the component to one or more active themes.
 
 ## Settings
 
-### Card sizing
+### Layout and behavior
 
 - `card_width`  
-  Any valid CSS width value, such as:
-  - `32rem`
-  - `420px`
-  - `40vw`
-  - `clamp(20rem, 40vw, 36rem)`
+  Any valid CSS width value for desktop cards, such as `32rem`, `420px`, `40vw`, or `clamp(20rem, 40vw, 36rem)`.
 
 - `card_max_height`  
-  Any valid CSS max-height value, such as:
-  - `10rem`
-  - `480px`
-  - `50vh`
-  - `min(60vh, 32rem)`
-
-### Behavior
+  Any valid CSS max-height value for desktop cards, such as `10rem`, `480px`, `50vh`, or `min(60vh, 32rem)`.
 
 - `card_delay_ms`  
-  Delay in milliseconds before the desktop hover card appears.
+  Delay in milliseconds before the hover card appears.
 
 - `enable_on_mobile`  
-  Enables the mobile tap-to-preview bottom-sheet experience.
+  Enables tap-to-preview behavior on touch devices.
 
-### Area targeting
+### Placement and sizing
 
-- `enable_on_topics`  
-  Show preview cards for topic links inside the original post.
-
-- `enable_on_replies`  
-  Show preview cards for topic links inside replies.
-
-- `enable_on_topic_lists`  
-  Show preview cards for topic links in topic lists.
-
-- `enable_on_suggested_topic_links`  
-  Show preview cards for topic links in the suggested topics area.
-
-## Desktop display settings
-
-- `show_thumbnail`
-- `thumbnail_placement`
-- `image_size_percent`
-- `show_category`
-- `show_tags`
-- `show_title`
-- `show_excerpt`
-- `excerpt_length`
-- `show_op`
-- `show_publish_date`
-- `show_views`
-- `show_reply_count`
-- `show_likes`
-- `show_activity`
-
-### Desktop image sizing
+- `thumbnail_placement`  
+  Desktop thumbnail placement: `top`, `left`, `right`, or `bottom`.
 
 - `image_size_percent`  
-  Controls thumbnail width for desktop left and right thumbnail layouts.
+  For desktop left/right layouts, controls the thumbnail width as a percentage of the card width.
 
-## Mobile display settings
-
-- `show_thumbnail_mobile`
-- `show_category_mobile`
-- `show_tags_mobile`
-- `show_title_mobile`
-- `show_excerpt_mobile`
-- `excerpt_length_mobile`
-- `show_op_mobile`
-- `show_publish_date_mobile`
-- `show_views_mobile`
-- `show_reply_count_mobile`
-- `show_likes_mobile`
-- `show_activity_mobile`
-
-### Mobile image sizing
+- `mobile_width_percent`  
+  Controls the mobile preview width as a percentage of the viewport width.
 
 - `mobile_thumbnail_height`  
-  Controls the mobile thumbnail height in pixels for the bottom-sheet layout.
+  Controls the mobile thumbnail height in pixels.
 
-## Defaults
+### Content visibility
 
-Current defaults:
+Desktop and mobile each have separate settings for:
 
-- `card_width: "32rem"`
-- `card_max_height: "10rem"`
-- `card_delay_ms: 300`
-- `enable_on_mobile: false`
-- `enable_on_topics: true`
-- `enable_on_replies: true`
-- `enable_on_topic_lists: true`
-- `enable_on_suggested_topic_links: true`
+- thumbnail
+- category
+- tags
+- title
+- excerpt
+- original poster
+- publish date
+- views
+- reply count
+- likes
+- last activity
 
-### Desktop defaults
+## Per-user disable toggle
 
-- `show_thumbnail: true`
-- `thumbnail_placement: left`
-- `image_size_percent: 30`
-- `show_category: true`
-- `show_tags: true`
-- `show_title: true`
-- `show_excerpt: true`
-- `excerpt_length: 3`
-- `show_op: true`
-- `show_publish_date: true`
-- `show_views: true`
-- `show_reply_count: true`
-- `show_likes: true`
-- `show_activity: true`
+This component supports a per-user preference so an individual user can disable hover cards for their own account.
 
-### Mobile defaults
+### Theme setting
 
-- `show_thumbnail_mobile: true`
-- `mobile_thumbnail_height: 160`
-- `show_category_mobile: true`
-- `show_tags_mobile: true`
-- `show_title_mobile: true`
-- `show_excerpt_mobile: true`
-- `excerpt_length_mobile: 3`
-- `show_op_mobile: true`
-- `show_publish_date_mobile: true`
-- `show_views_mobile: true`
-- `show_reply_count_mobile: true`
-- `show_likes_mobile: true`
-- `show_activity_mobile: false`
+- `user_preference_field_name`  
+  The custom user field key used to disable hover cards per user.
 
-## Content sources
+Default:
 
-The preview card currently uses:
-
-- Topic title
-- Topic excerpt or first-post cooked content
-- Topic thumbnail
-- Category resolved from `category_id`
-- Tags normalized from string or object form
-- Original poster username and avatar
-- Publish date
-- View count
-- Reply count
-- Like count
-- Last activity date
-
-## Screenshots
-
-### Desktop hover card
-
-Add a desktop screenshot here once available:
-
-```md
-
+```text
+disable_topic_hover_cards
 ```
 
-### Mobile bottom sheet
+### How it works
 
-Add a mobile screenshot here once available:
+When the component loads, it checks the current user for the configured custom user field. If the field contains a truthy value, the hover-card behavior does not initialize for that user.
 
-```md
+Accepted truthy values include:
 
+- `true`
+- `1`
+- `"1"`
+- `"true"`
+- `"yes"`
+- `"on"`
+- `"checked"`
+
+## Admin setup for the per-user toggle
+
+Create a custom user field in Discourse Admin.
+
+Suggested setup:
+
+- **Label:** `Disable topic hover cards`
+- **Description:** `Turn off topic hover cards for this account`
+- **Type:** checkbox / confirmation style field
+- **Editable by user:** enabled
+- **Shown in preferences or editable profile UI:** enabled
+
+Then set the component setting:
+
+```text
+user_preference_field_name = disable_topic_hover_cards
 ```
 
-### Mobile actions
+The field key on your site must match the value configured in the theme setting.
 
-Add a second mobile screenshot showing the close button and action button:
+## Mobile behavior
 
-```md
+When mobile support is enabled:
 
-```
+- tapping a supported internal topic link opens a bottom-sheet preview
+- the bottom sheet width is controlled by `mobile_width_percent`
+- the image height is controlled by `mobile_thumbnail_height`
 
-GitHub README images are typically added using relative paths to image files committed into the repository. [web:474][web:476]
+## Supported link locations
+
+Hover cards can be enabled independently for:
+
+- links in topic bodies
+- links in replies
+- links in topic lists
+- links in suggested topics
 
 ## Notes
 
-- Only internal Discourse topic links are supported.
+- Only internal topic links are targeted.
 - External links are ignored.
-- Scrolls inside the preview card do not close the card.
-- Scrolls outside the card close the card.
-- Category display depends on category data being resolvable through Discourse’s client-side category information.
-- Tag rendering supports both plain strings and object-shaped tag data.
-- On mobile, the preview is shown as a bottom sheet rather than a floating tooltip.
-- On desktop, thumbnail width is configurable for side-image layouts.
-- On mobile, thumbnail height is configurable for the bottom-sheet layout.
-
-## File structure
-
-```text
-discourse-topic-hover-cards/
-├── about.json
-├── settings.yml
-├── common/
-│   └── common.scss
-├── javascripts/
-│   └── discourse/
-│       └── api-initializers/
-│           └── discourse-topic-hover-cards.gjs
-├── locales/
-│   └── en.yml
-└── .discourse-compatibility
-```
+- The per-user custom field disables the component for that specific user only.
+- Global mobile disable still overrides user-level preference for mobile behavior because the component does not initialize mobile previews when mobile is globally off.
 
 ## Compatibility
 
-This component is intended for modern Discourse versions and should be used as a remote theme component with current Discourse theme APIs. Theme components are the preferred packaging format for focused UI enhancements like this. [web:365][web:409]
-
-## Development
-
-If you are developing this locally:
-
-- Keep settings in `settings.yml`, because Discourse theme settings are defined repository-side. [web:409]
-- Keep JavaScript in `javascripts/discourse/api-initializers/` for API initializer loading. [web:365]
-- Keep translations in `locales/en.yml`, where theme and component strings are localized. [web:379]
-- Keep shared styles in `common/common.scss`. `common.scss` applies to both desktop and mobile unless you intentionally scope behavior with media queries. [web:239][web:464]
+Designed for modern Discourse versions that support theme components, theme settings, theme translations, and JS API initializers.
 
 ## Credits
 
-Inspired by the general Topic Cards concept, adapted into a hover and tap preview component for use inside posts, replies, topic lists, and suggested-topic links. The original Topic Cards approach is a separate Discourse theme component focused on restyling topic lists as cards. [web:317]
+Inspired by card-based topic previews and adapted for hover and mobile preview behavior inside Discourse.
