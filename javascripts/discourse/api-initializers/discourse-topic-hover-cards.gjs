@@ -7,6 +7,7 @@ const DELAY_HIDE = 200;
 const CARD_WIDTH = settings.card_width || "32rem";
 const CARD_MAX_H = settings.card_max_height || "10rem";
 const MOBILE_ENABLED = settings.enable_on_mobile ?? false;
+const MOBILE_WIDTH_PERCENT = settings.mobile_width_percent ?? 100;
 const VIEWPORT_MARGIN = 12;
 
 const TOPIC_LINK_RE = /\/t\/(?:[^/]+\/)?([0-9]+)(?:\/[0-9]+)?/;
@@ -408,6 +409,7 @@ export default apiInitializer((api) => {
     tooltip.setAttribute("aria-live", "polite");
     tooltip.style.setProperty("--thc-width", CARD_WIDTH);
     tooltip.style.setProperty("--thc-max-h", CARD_MAX_H);
+    tooltip.style.setProperty("--thc-mobile-width", `${MOBILE_WIDTH_PERCENT}vw`);
 
     tooltip.addEventListener("mouseenter", () => {
       isInsideCard = true;
