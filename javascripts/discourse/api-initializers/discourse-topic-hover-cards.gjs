@@ -1,6 +1,5 @@
 import { later, cancel } from "@ember/runloop";
 import { apiInitializer } from "discourse/lib/api";
-import { ajax } from "discourse/lib/ajax";
 
 const DELAY_SHOW = settings.card_delay_ms ?? 300;
 const DELAY_HIDE = 200;
@@ -9,7 +8,7 @@ const CARD_MAX_H = settings.card_max_height || "10rem";
 const MOBILE_ENABLED = settings.enable_on_mobile ?? false;
 const MOBILE_WIDTH_PERCENT = settings.mobile_width_percent ?? 100;
 const USER_PREFERENCE_FIELD_NAME =
-  settings.user_preference_field_name || "user_field_1";
+  settings.user_preference_field_name || "disable_topic_hover_cards";
 const DEBUG_MODE = settings.debug_mode ?? false;
 const RESOLVE_USER_FIELD_ID_FOR_ADMINS =
   settings.resolve_user_field_id_for_admins ?? true;
@@ -19,6 +18,25 @@ const TOPIC_LINK_RE = /\/t\/(?:[^/]+\/)?([0-9]+)(?:\/[0-9]+)?/;
 
 function isTouchDevice() {
   return window.matchMedia("(hover: none) and (pointer: coarse)").matches;
+}
+
+function isMobileView() {
+  return isTouchDevice() || window.matchMedia("(max-width: 767px)").matches;
+}
+
+async function getJSON(url) {
+  const response = await fetch(url, {
+    credentials: "same-origin",
+    headers: {
+      Accept: "application/json",
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error(`Request failed: ${response.status} ${response.statusText}`);
+  }
+
+  return await response.json();
 }
 
 function topicIdFromHref(href) {
@@ -193,7 +211,7 @@ async function resolveUserFieldIdForAdmins(currentUser) {
     return resolvedUserFieldIdPromise;
   }
 
-  resolvedUserFieldIdPromise = ajax("/admin/config/user-fields.json")
+  resolvedUserFieldIdPromise = getJSON("/admin/config/user-fields.json")
     .then((result) => {
       const fields = Array.isArray(result) ? result : result?.user_fields || [];
       const wanted = String(USER_PREFERENCE_FIELD_NAME).trim().toLowerCase();
@@ -201,6 +219,7 @@ async function resolveUserFieldIdForAdmins(currentUser) {
       const match = fields.find((field) => {
         const id = field?.id;
         const name = String(field?.name || "").trim().toLowerCase();
+
         return (
           name === wanted ||
           `user_field_${id}` === wanted ||
@@ -307,7 +326,8 @@ async function hoverCardsDisabledForUser(api, currentUser) {
       configuredField: USER_PREFERENCE_FIELD_NAME,
       matchedKey: match.key,
       value: match.value,
-      source: match.key in fullUserFields ? "user.user_fields" : "user.custom_fields",
+      source:
+        match.key in fullUserFields ? "user.user_fields" : "user.custom_fields",
     });
     return true;
   }
@@ -323,7 +343,8 @@ async function hoverCardsDisabledForUser(api, currentUser) {
         resolvedId,
         matchedKey: match.key,
         value: match.value,
-        source: match.key in fullUserFields ? "user.user_fields" : "user.custom_fields",
+        source:
+          match.key in fullUserFields ? "user.user_fields" : "user.custom_fields",
       });
       return true;
     }
@@ -619,7 +640,6 @@ export default apiInitializer((api) => {
   const site = api.container.lookup("service:site");
   const currentUser =
     api.getCurrentUser?.() || api.container.lookup("service:current-user");
-  const onMobile = site.mobileView || isTouchDevice();
 
   (async () => {
     const isDisabled = await hoverCardsDisabledForUser(api, currentUser);
@@ -629,7 +649,7 @@ export default apiInitializer((api) => {
       return;
     }
 
-    if (onMobile && !MOBILE_ENABLED) {
+    if (isMobileView() && !MOBILE_ENABLED) {
       debugLog("Mobile detected and mobile support disabled");
       return;
     }
@@ -651,7 +671,10 @@ export default apiInitializer((api) => {
       tooltip.setAttribute("aria-live", "polite");
       tooltip.style.setProperty("--thc-width", CARD_WIDTH);
       tooltip.style.setProperty("--thc-max-h", CARD_MAX_H);
-      tooltip.style.setProperty("--thc-mobile-width", `${MOBILE_WIDTH_PERCENT}vw`);
+      tooltip.style.setProperty(
+        "--thc-mobile-width",
+        `${MOBILE_WIDTH_PERCENT}vw`
+      );
 
       tooltip.addEventListener("mouseenter", () => {
         isInsideCard = true;
@@ -682,7 +705,7 @@ export default apiInitializer((api) => {
           return;
         }
 
-        if (onMobile) {
+        if (isMobileView()) {
           event.preventDefault();
           event.stopPropagation();
         }
@@ -692,7 +715,7 @@ export default apiInitializer((api) => {
     }
 
     function positionTooltip(anchorRect) {
-      if (!tooltip || onMobile) return;
+      if (!tooltip || isMobileView()) return;
 
       const vw = window.innerWidth;
       const vh = window.innerHeight;
@@ -736,16 +759,21 @@ export default apiInitializer((api) => {
       }
 
       currentTopicId = topicId;
+      const mobile = isMobileView();
 
       if (topicCache[topicId]) {
-        tooltip.innerHTML = buildCardHTML(topicCache[topicId], site, onMobile);
+        tooltip.innerHTML = buildCardHTML(topicCache[topicId], site, mobile);
       } else {
         tooltip.innerHTML = skeletonHTML();
         fetchTopic(topicId)
           .then((data) => {
             if (currentTopicId === topicId) {
               topicCache[topicId] = data;
-              tooltip.innerHTML = buildCardHTML(data, site, onMobile);
+              tooltip.innerHTML = buildCardHTML(
+                data,
+                site,
+                isMobileView()
+              );
               positionTooltip(anchorRect);
             }
           })
@@ -786,7 +814,7 @@ export default apiInitializer((api) => {
 
     async function fetchTopic(topicId) {
       if (topicCache[topicId]) return topicCache[topicId];
-      const data = await ajax(`/t/${topicId}.json`);
+      const data = await getJSON(`/t/${topicId}.json`);
       topicCache[topicId] = data;
       return data;
     }
@@ -811,7 +839,7 @@ export default apiInitializer((api) => {
     }
 
     function onMouseEnter(event) {
-      if (onMobile) return;
+      if (isMobileView()) return;
 
       const link = event.target.closest("a[href]");
       if (!link) return;
@@ -824,7 +852,7 @@ export default apiInitializer((api) => {
     }
 
     function onMouseLeave(event) {
-      if (onMobile) return;
+      if (isMobileView()) return;
 
       const link = event.target.closest("a[href]");
       if (!link || !topicIdFromHref(link.href)) return;
@@ -833,7 +861,7 @@ export default apiInitializer((api) => {
     }
 
     function onTouchStart(event) {
-      if (!onMobile || !MOBILE_ENABLED) return;
+      if (!isMobileView() || !MOBILE_ENABLED) return;
 
       if (event.target.closest(".topic-hover-card-tooltip")) {
         return;
@@ -853,7 +881,7 @@ export default apiInitializer((api) => {
     }
 
     function onDocumentClick(event) {
-      if (!onMobile || !MOBILE_ENABLED) return;
+      if (!isMobileView() || !MOBILE_ENABLED) return;
 
       if (suppressNextClick) {
         const link = event.target.closest("a[href]");
@@ -905,9 +933,9 @@ export default apiInitializer((api) => {
     });
 
     debugLog("Hover cards initialized", {
-      onMobile,
       mobileEnabled: MOBILE_ENABLED,
       configuredField: USER_PREFERENCE_FIELD_NAME,
+      currentViewportIsMobile: isMobileView(),
     });
   })();
 });
