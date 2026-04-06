@@ -53,11 +53,11 @@ image_size_percent:
   min: 15
   max: 60
 
-image_size_percent_mobile:
+mobile_thumbnail_height:
   type: integer
-  default: 100
-  min: 15
-  max: 100
+  default: 160
+  min: 80
+  max: 320
 
 show_category:
   type: bool
