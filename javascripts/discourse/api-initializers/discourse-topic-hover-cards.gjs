@@ -6,8 +6,7 @@ import { ajax } from "discourse/lib/ajax";
 // discourse-topic-hover-cards
 // Shows a rich topic card as a hover tooltip whenever a
 // user mouses over any internal topic link inside a post
-// or reply body. Works on .cooked links, suggested topics,
-// timeline jump links, etc.
+// or reply body, topic lists, or suggested topics.
 //
 // On mobile (touch devices) the card opens on tap when
 // enable_on_mobile is true, and a second tap navigates.
@@ -20,8 +19,8 @@ const DELAY_SHOW = settings.card_delay_ms ?? 300;
 const DELAY_HIDE = 200;
 const CARD_WIDTH = settings.card_width || "32rem";
 const CARD_MAX_H = settings.card_max_height || "10rem";
-const IMAGE_SIZE_PERCENT = settings.image_size_percent ?? 30;
 const EXCERPT_LENGTH = settings.excerpt_length ?? 3;
+const IMAGE_SIZE_PERCENT = settings.image_size_percent ?? 30;
 const MOBILE_ENABLED = settings.enable_on_mobile ?? false;
 const VIEWPORT_MARGIN = 12;
 
@@ -97,7 +96,36 @@ function dIconSVG(name) {
   return `<svg class="d-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${d}"/></svg>`;
 }
 
-function buildCardHTML(topic, isMobile = false) {
+function findCategoryById(site, categoryId) {
+  if (!site || !categoryId) return null;
+
+  const categories =
+    site.categoriesList?.categories ||
+    site.categories ||
+    [];
+
+  return categories.find((c) => Number(c.id) === Number(categoryId)) || null;
+}
+
+function normalizeTag(tag) {
+  if (!tag) return null;
+  if (typeof tag === "string") return tag;
+
+  if (typeof tag === "object") {
+    return (
+      tag.name ||
+      tag.id ||
+      tag.text ||
+      tag.value ||
+      tag.slug ||
+      null
+    );
+  }
+
+  return String(tag);
+}
+
+function buildCardHTML(topic, site, isMobile = false) {
   const configuredPlacement = settings.thumbnail_placement || "left";
   const placement = isMobile ? "top" : configuredPlacement;
 
@@ -110,35 +138,49 @@ function buildCardHTML(topic, isMobile = false) {
 
   let categoryHTML = "";
   if (settings.show_category && topic.category_id) {
+    const category = findCategoryById(site, topic.category_id);
+
     const name =
+      category?.name ||
+      category?.slug ||
       topic.category_name ||
       topic.category_slug ||
-      "Category";
+      "";
 
-    const color = topic.category_color
-      ? `#${topic.category_color}`
-      : "var(--tertiary, var(--primary-medium))";
+    const color = category?.color
+      ? `#${category.color}`
+      : topic.category_color
+        ? `#${topic.category_color}`
+        : "var(--tertiary, var(--primary-medium))";
 
-    categoryHTML = `
-      <div class="topic-hover-card__category">
-        <span class="topic-hover-card__category-badge" style="--thc-category-color: ${color};">
-          ${name}
-        </span>
-      </div>
-    `;
+    if (name) {
+      categoryHTML = `
+        <div class="topic-hover-card__category">
+          <span class="topic-hover-card__category-badge" style="--thc-category-color: ${color};">
+            ${name}
+          </span>
+        </div>
+      `;
+    }
   }
 
   let tagsHTML = "";
   if (settings.show_tags && Array.isArray(topic.tags) && topic.tags.length) {
-    tagsHTML = `
-      <div class="topic-hover-card__tags">
-        ${topic.tags
-          .map(
-            (tag) => `<span class="topic-hover-card__tag">${tag}</span>`
-          )
-          .join("")}
-      </div>
-    `;
+    const normalizedTags = topic.tags
+      .map((tag) => normalizeTag(tag))
+      .filter(Boolean);
+
+    if (normalizedTags.length) {
+      tagsHTML = `
+        <div class="topic-hover-card__tags">
+          ${normalizedTags
+            .map(
+              (tag) => `<span class="topic-hover-card__tag">${tag}</span>`
+            )
+            .join("")}
+        </div>
+      `;
+    }
   }
 
   const title = topic.fancy_title ?? topic.title ?? "(no title)";
@@ -164,7 +206,14 @@ function buildCardHTML(topic, isMobile = false) {
 
   let opHTML = "";
   if (settings.show_op) {
-    const op = topic.details?.created_by ?? topic.posters?.[0]?.user;
+    const op =
+      topic.details?.created_by ||
+      topic.post_stream?.posts?.[0]?.username && {
+        username: topic.post_stream.posts[0].username,
+        avatar_template: topic.post_stream.posts[0].avatar_template,
+      } ||
+      topic.posters?.[0]?.user;
+
     if (op) {
       const avatarTemplate = op.avatar_template?.replace("{size}", "24");
       const avatarURL = avatarTemplate
@@ -312,8 +361,8 @@ export default apiInitializer((api) => {
     tooltip.setAttribute("aria-live", "polite");
     tooltip.style.setProperty("--thc-width", CARD_WIDTH);
     tooltip.style.setProperty("--thc-max-h", CARD_MAX_H);
-    tooltip.style.setProperty("--thc-image-size-percent", String(IMAGE_SIZE_PERCENT));
     tooltip.style.setProperty("--thc-excerpt-lines", String(EXCERPT_LENGTH));
+    tooltip.style.setProperty("--thc-image-size-percent", String(IMAGE_SIZE_PERCENT));
 
     tooltip.addEventListener("mouseenter", () => {
       isInsideCard = true;
@@ -334,7 +383,7 @@ export default apiInitializer((api) => {
     const vw = window.innerWidth;
     const vh = window.innerHeight;
     const cardH = tooltip.offsetHeight || 320;
-    const cardW = Math.min(tooltip.offsetWidth || 384, vw - VIEWPORT_MARGIN * 2);
+    const cardW = Math.min(tooltip.offsetWidth || 512, vw - VIEWPORT_MARGIN * 2);
 
     let top = anchorRect.bottom + 10;
     let isAbove = false;
@@ -372,14 +421,14 @@ export default apiInitializer((api) => {
     currentTopicId = topicId;
 
     if (topicCache[topicId]) {
-      tooltip.innerHTML = buildCardHTML(topicCache[topicId], onMobile);
+      tooltip.innerHTML = buildCardHTML(topicCache[topicId], site, onMobile);
     } else {
       tooltip.innerHTML = skeletonHTML();
       fetchTopic(topicId)
         .then((data) => {
           if (currentTopicId === topicId) {
             topicCache[topicId] = data;
-            tooltip.innerHTML = buildCardHTML(data, onMobile);
+            tooltip.innerHTML = buildCardHTML(data, site, onMobile);
             positionTooltip(anchorRect);
           }
         })
@@ -426,18 +475,18 @@ export default apiInitializer((api) => {
   }
 
   function linkInSupportedArea(link) {
-    const inTopicList = !!link.closest(".topic-list");
     const inSuggested = !!link.closest(".suggested-topics");
-    const post = link.closest(".topic-post");
-    const inPostCooked = !!link.closest(".topic-post .cooked");
-
     if (inSuggested && settings.enable_on_suggested_topic_links) {
       return true;
     }
 
+    const inTopicList = !!link.closest(".topic-list");
     if (inTopicList && settings.enable_on_topic_lists) {
       return true;
     }
+
+    const post = link.closest(".topic-post");
+    const inPostCooked = !!link.closest(".topic-post .cooked");
 
     if (inPostCooked && post) {
       const isFirstPost = post.classList.contains("topic-owner");
