@@ -6,26 +6,29 @@
 card_width:
   type: string
   default: 32rem
-  description: "Any valid CSS width, e.g. 420px, 32rem, 40vw, clamp(18rem, 40vw, 28rem)"
+  description: "Any valid CSS width, e.g. 420px, 32rem, 40vw, clamp(18rem, 40vw, 28rem)."
 
 card_max_height:
   type: string
   default: 10rem
-  description: "Any valid CSS max-height, e.g. 480px, 60vh, 32rem, min(70vh, 560px)"
+  description: "Any valid CSS max-height, e.g. 480px, 60vh, 32rem, min(70vh, 560px)."
 
 # --- Behaviour ---
 card_delay_ms:
   type: integer
   default: 300
+  description: "Delay in milliseconds before the hover card appears."
 
 enable_on_mobile:
   type: bool
   default: false
+  description: "Enable tap-to-preview behavior on touch devices."
 
 # --- Card sections ---
 show_thumbnail:
   type: bool
   default: true
+  description: "Display the topic thumbnail image when available."
 
 thumbnail_placement:
   type: enum
@@ -35,6 +38,7 @@ thumbnail_placement:
     - left
     - right
     - bottom
+    description: "Choose where the thumbnail appears on desktop. On mobile, the thumbnail is always shown at the top."
 
 image_size_percent:
   type: integer
@@ -46,10 +50,12 @@ image_size_percent:
 show_title:
   type: bool
   default: true
+  description: "Display the topic title inside the card."
 
 show_excerpt:
   type: bool
   default: true
+  description: "Display a cleaned excerpt from the topic, excluding image metadata and captions."
 
 excerpt_length:
   type: integer
@@ -61,42 +67,52 @@ excerpt_length:
 show_op:
   type: bool
   default: true
+  description: "Display the original poster avatar and username."
 
 # --- Metadata row ---
 show_publish_date:
   type: bool
   default: true
+  description: "Display the topic creation date."
 
 show_views:
   type: bool
   default: true
+  description: "Display the topic view count."
 
 show_reply_count:
   type: bool
   default: true
+  description: "Display the topic reply count."
 
 show_likes:
   type: bool
   default: true
+  description: "Display the topic like count."
 
 show_activity:
   type: bool
   default: true
+  description: "Display the most recent topic activity date."
 
 # --- Enabled on ---
 
 enable_on_topics:
   type: bool
   default: true
+  description: "Show hover cards for topic links inside the original post."
 
 enable_on_replies:
   type: bool
   default: true
+  description: "Show hover cards for topic links inside replies."
 
 enable_on_topic_lists:
   type: bool
   default: true
+  description: "Show hover cards for topic links in topic lists."
 
 enable_on_suggested_topic_links:
   type: bool
   default: true
+  description: "Show hover cards for links in the suggested topics section."
