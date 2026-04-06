@@ -27,6 +27,12 @@ en:
     show_title: "Show topic title"
     show_title_description: "Display the topic title inside the card."
 
+    show_category: "Show category"
+    show_category_description: "Display the topic category in the hover card."
+
+    show_tags: "Show tags"
+    show_tags_description: "Display topic tags in the hover card when tags are present."
+
     show_excerpt: "Show excerpt"
     show_excerpt_description: "Display a cleaned excerpt from the topic, excluding image metadata and captions."
 
