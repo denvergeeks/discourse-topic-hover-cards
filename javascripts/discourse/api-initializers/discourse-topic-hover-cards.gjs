@@ -18,8 +18,9 @@ import { ajax } from "discourse/lib/ajax";
 
 const DELAY_SHOW = settings.card_delay_ms ?? 300;
 const DELAY_HIDE = 200;
-const CARD_WIDTH = settings.card_width || "420px";
-const CARD_MAX_H = settings.card_max_height || "480px";
+const CARD_WIDTH = settings.card_width || "24rem";
+const CARD_MAX_H = settings.card_max_height || "18rem";
+const EXCERPT_LENGTH = settings.excerpt_length ?? 3;
 const MOBILE_ENABLED = settings.enable_on_mobile ?? false;
 const VIEWPORT_MARGIN = 12;
 
@@ -96,7 +97,7 @@ function dIconSVG(name) {
 }
 
 function buildCardHTML(topic, isMobile = false) {
-  const configuredPlacement = settings.thumbnail_placement || "top";
+  const configuredPlacement = settings.thumbnail_placement || "left";
   const placement = isMobile ? "top" : configuredPlacement;
 
   const thumbnail =
@@ -124,7 +125,6 @@ function buildCardHTML(topic, isMobile = false) {
     : "";
 
   const firstPost = topic.post_stream?.posts?.[0];
-
   const excerptSource =
     topic.excerpt ||
     firstPost?.excerpt ||
@@ -152,8 +152,19 @@ function buildCardHTML(topic, isMobile = false) {
       const avatarImg = avatarURL
         ? `<img src="${avatarURL}" width="24" height="24" alt="" loading="lazy">`
         : "";
-      opHTML = `<div class="topic-hover-card__op">${avatarImg}<span class="username">${op.username}</span></div>`;
+      opHTML = `<span class="topic-hover-card__op">${avatarImg}<span class="username">${op.username}</span></span>`;
     }
+  }
+
+  let publishDate = "";
+  if (settings.show_publish_date && topic.created_at) {
+    const d = new Date(topic.created_at);
+    const fmt = d.toLocaleDateString(undefined, {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
+    publishDate = `<span class="topic-hover-card__publish-date">${fmt}</span>`;
   }
 
   const statItems = [];
@@ -193,21 +204,11 @@ function buildCardHTML(topic, isMobile = false) {
     ? `<div class="topic-hover-card__stats">${statItems.join("")}</div>`
     : "";
 
-  let publishDate = "";
-  if (settings.show_publish_date && topic.created_at) {
-    const d = new Date(topic.created_at);
-    const fmt = d.toLocaleDateString(undefined, {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
-    publishDate = `<span class="topic-hover-card__publish-date">${fmt}</span>`;
-  }
+  const metadataItems = [opHTML, publishDate, statsHTML].filter(Boolean).join("");
 
-  const metadata =
-    publishDate || statsHTML
-      ? `<div class="topic-hover-card__metadata">${publishDate}${statsHTML}</div>`
-      : "";
+  const metadata = metadataItems
+    ? `<div class="topic-hover-card__metadata">${metadataItems}</div>`
+    : "";
 
   const tapHint =
     isMobile && MOBILE_ENABLED
@@ -218,7 +219,6 @@ function buildCardHTML(topic, isMobile = false) {
       ${categoryHTML}
       ${titleHTML}
       ${excerpt}
-      ${opHTML}
       ${metadata}
       ${tapHint}
   `;
@@ -288,6 +288,7 @@ export default apiInitializer((api) => {
     tooltip.setAttribute("aria-live", "polite");
     tooltip.style.setProperty("--thc-width", CARD_WIDTH);
     tooltip.style.setProperty("--thc-max-h", CARD_MAX_H);
+    tooltip.style.setProperty("--thc-excerpt-lines", String(EXCERPT_LENGTH));
 
     tooltip.addEventListener("mouseenter", () => {
       isInsideCard = true;
@@ -308,7 +309,7 @@ export default apiInitializer((api) => {
     const vw = window.innerWidth;
     const vh = window.innerHeight;
     const cardH = tooltip.offsetHeight || 320;
-    const cardW = Math.min(tooltip.offsetWidth || 420, vw - VIEWPORT_MARGIN * 2);
+    const cardW = Math.min(tooltip.offsetWidth || 384, vw - VIEWPORT_MARGIN * 2);
 
     let top = anchorRect.bottom + 10;
     let isAbove = false;
