@@ -158,19 +158,12 @@ function buildCardHTML(topic, site, isMobile = false) {
     3,
     isMobile
   );
-  const imageSizePercent = mobileInt(
-    "image_size_percent",
-    "image_size_percent_mobile",
-    30,
-    isMobile
-  );
+
+  const desktopImageSizePercent = settings.image_size_percent ?? 30;
+  const mobileThumbnailHeight = settings.mobile_thumbnail_height ?? 160;
 
   const configuredPlacement = settings.thumbnail_placement || "left";
   const placement = isMobile ? "top" : configuredPlacement;
-
-  const mobileImageHeight = isMobile
-    ? Math.max(96, Math.round((imageSizePercent / 100) * 220))
-    : null;
 
   const mobileCloseButton = isMobile
     ? `<button class="topic-hover-card__close" type="button" data-thc-close aria-label="Close preview">
@@ -347,8 +340,8 @@ function buildCardHTML(topic, site, isMobile = false) {
   `;
 
   const wrapperStyle = isMobile
-    ? `style="--thc-mobile-image-height:${mobileImageHeight}px;"`
-    : `style="--thc-image-size-percent:${imageSizePercent};"`;
+    ? `style="--thc-mobile-image-height:${mobileThumbnailHeight}px;"`
+    : `style="--thc-image-size-percent:${desktopImageSizePercent};"`;
 
   switch (placement) {
     case "left":
