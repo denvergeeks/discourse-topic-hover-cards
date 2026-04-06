@@ -1,7 +1,6 @@
 section_general:
-  type: string
-  default: "──────── General ────────"
-  description: "Section label only."
+  type: enum
+  default: "──────── GENERAL SETTINGS ────────"
 
 card_width:
   type: string
@@ -41,9 +40,8 @@ resolve_user_field_id_for_admins:
   description: "When enabled, admins can configure the preference field by name or user_field_X; the component resolves the numeric user-field ID via /admin/config/user-fields.json."
 
 section_link_locations:
-  type: string
-  default: "──────── Link locations ────────"
-  description: "Section label only."
+  type: enum
+  default: "──────── WHERE TO ENABLE HOVER CARDS ON TOPIC LINKS ────────"
 
 enable_on_topics:
   type: bool
@@ -81,9 +79,8 @@ enable_on_suggested_topic_links:
   description: "Show hover cards for links in the suggested topics section."
 
 section_content:
-  type: string
-  default: "──────── Content & layout ────────"
-  description: "Section label only."
+  type: enum
+  default: "──────── HOVER CARDS CONTENT & LAYOUT ────────"
 
 show_thumbnail:
   type: bool
