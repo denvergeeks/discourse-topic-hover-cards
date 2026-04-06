@@ -10,6 +10,9 @@ const MOBILE_ENABLED = settings.enable_on_mobile ?? false;
 const MOBILE_WIDTH_PERCENT = settings.mobile_width_percent ?? 100;
 const USER_PREFERENCE_FIELD_NAME =
   settings.user_preference_field_name || "disable_topic_hover_cards";
+const DEBUG_MODE = settings.debug_mode ?? false;
+const RESOLVE_USER_FIELD_ID_FOR_ADMINS =
+  settings.resolve_user_field_id_for_admins ?? true;
 const VIEWPORT_MARGIN = 12;
 
 const TOPIC_LINK_RE = /\/t\/(?:[^/]+\/)?([0-9]+)(?:\/[0-9]+)?/;
@@ -87,10 +90,7 @@ function dIconSVG(name) {
 function findCategoryById(site, categoryId) {
   if (!site || !categoryId) return null;
 
-  const categories =
-    site.categoriesList?.categories ||
-    site.categories ||
-    [];
+  const categories = site.categoriesList?.categories || site.categories || [];
 
   return categories.find((c) => Number(c.id) === Number(categoryId)) || null;
 }
@@ -124,6 +124,11 @@ function densitySetting(isMobile) {
   return ["default", "cozy", "compact"].includes(value) ? value : "default";
 }
 
+function debugLog(...args) {
+  if (!DEBUG_MODE) return;
+  console.info("[topic-hover-cards]", ...args);
+}
+
 function fieldValueIsTruthy(value) {
   if (value === true || value === 1) return true;
 
@@ -135,22 +140,148 @@ function fieldValueIsTruthy(value) {
   return false;
 }
 
-function hoverCardsDisabledForUser(currentUser) {
+function currentUserIsStaffLike(currentUser) {
+  return !!(currentUser?.admin || currentUser?.staff || currentUser?.moderator);
+}
+
+function normalizedFieldKeyVariants(fieldNameOrKey) {
+  if (!fieldNameOrKey) return [];
+
+  const raw = String(fieldNameOrKey).trim();
+  if (!raw) return [];
+
+  const keys = new Set([raw]);
+
+  if (/^\d+$/.test(raw)) {
+    keys.add(`user_field_${raw}`);
+  }
+
+  if (/^user_field_\d+$/.test(raw)) {
+    keys.add(raw.replace(/^user_field_/, ""));
+  }
+
+  return [...keys];
+}
+
+function findTruthyFieldMatch(record, candidateKeys) {
+  if (!record || !candidateKeys?.length) return null;
+
+  for (const key of candidateKeys) {
+    if (key in record && fieldValueIsTruthy(record[key])) {
+      return {
+        key,
+        value: record[key],
+      };
+    }
+  }
+
+  return null;
+}
+
+let resolvedUserFieldIdPromise = null;
+let resolvedUserFieldId = null;
+
+async function resolveUserFieldIdForAdmins(currentUser) {
+  if (!RESOLVE_USER_FIELD_ID_FOR_ADMINS) return null;
+  if (!currentUserIsStaffLike(currentUser)) return null;
+  if (!USER_PREFERENCE_FIELD_NAME) return null;
+
+  if (resolvedUserFieldId !== null) {
+    return resolvedUserFieldId;
+  }
+
+  if (resolvedUserFieldIdPromise) {
+    return resolvedUserFieldIdPromise;
+  }
+
+  resolvedUserFieldIdPromise = ajax("/admin/config/user-fields.json")
+    .then((result) => {
+      const fields = Array.isArray(result) ? result : result?.user_fields || [];
+      const wanted = String(USER_PREFERENCE_FIELD_NAME).trim().toLowerCase();
+
+      const match = fields.find((field) => {
+        const name = String(field?.name || "").trim().toLowerCase();
+        return name === wanted;
+      });
+
+      resolvedUserFieldId = match?.id ?? null;
+
+      debugLog("Resolved admin user-field mapping", {
+        configuredField: USER_PREFERENCE_FIELD_NAME,
+        resolvedUserFieldId,
+      });
+
+      return resolvedUserFieldId;
+    })
+    .catch((error) => {
+      debugLog("Could not resolve user-field ID from admin endpoint", error);
+      resolvedUserFieldId = null;
+      return null;
+    })
+    .finally(() => {
+      resolvedUserFieldIdPromise = null;
+    });
+
+  return resolvedUserFieldIdPromise;
+}
+
+async function hoverCardsDisabledForUser(currentUser) {
   if (!currentUser || !USER_PREFERENCE_FIELD_NAME) return false;
 
-  const customFieldValue =
-    currentUser?.custom_fields?.[USER_PREFERENCE_FIELD_NAME];
+  const customFields = currentUser?.custom_fields || {};
+  const userFields = currentUser?.user_fields || {};
+  const directCandidates = normalizedFieldKeyVariants(
+    USER_PREFERENCE_FIELD_NAME
+  );
 
-  if (fieldValueIsTruthy(customFieldValue)) {
+  let match =
+    findTruthyFieldMatch(customFields, directCandidates) ||
+    findTruthyFieldMatch(userFields, directCandidates);
+
+  if (match) {
+    debugLog("Disable field matched directly", {
+      configuredField: USER_PREFERENCE_FIELD_NAME,
+      matchedKey: match.key,
+      value: match.value,
+      source:
+        match.key in customFields
+          ? "currentUser.custom_fields"
+          : "currentUser.user_fields",
+    });
     return true;
   }
 
-  const directUserFieldValue =
-    currentUser?.user_fields?.[USER_PREFERENCE_FIELD_NAME];
+  const resolvedId = await resolveUserFieldIdForAdmins(currentUser);
 
-  if (fieldValueIsTruthy(directUserFieldValue)) {
-    return true;
+  if (resolvedId) {
+    const resolvedCandidates = normalizedFieldKeyVariants(resolvedId);
+
+    match =
+      findTruthyFieldMatch(customFields, resolvedCandidates) ||
+      findTruthyFieldMatch(userFields, resolvedCandidates);
+
+    if (match) {
+      debugLog("Disable field matched via resolved numeric field ID", {
+        configuredField: USER_PREFERENCE_FIELD_NAME,
+        resolvedId,
+        matchedKey: match.key,
+        value: match.value,
+        source:
+          match.key in customFields
+            ? "currentUser.custom_fields"
+            : "currentUser.user_fields",
+      });
+      return true;
+    }
   }
+
+  debugLog("No disable field match found", {
+    configuredField: USER_PREFERENCE_FIELD_NAME,
+    directCandidates,
+    resolvedUserFieldId,
+    availableCustomFieldKeys: Object.keys(customFields || {}),
+    availableUserFieldKeys: Object.keys(userFields || {}),
+  });
 
   return false;
 }
@@ -434,281 +565,293 @@ export default apiInitializer((api) => {
     api.getCurrentUser?.() || api.container.lookup("service:current-user");
   const onMobile = site.mobileView || isTouchDevice();
 
-  if (hoverCardsDisabledForUser(currentUser)) {
-    return;
-  }
+  (async () => {
+    const isDisabled = await hoverCardsDisabledForUser(currentUser);
 
-  if (onMobile && !MOBILE_ENABLED) {
-    return;
-  }
+    if (isDisabled) {
+      debugLog("Hover cards disabled for current user");
+      return;
+    }
 
-  let tooltip = null;
-  let showTimer = null;
-  let hideTimer = null;
-  let currentTopicId = null;
-  let topicCache = {};
-  let isInsideCard = false;
-  let suppressNextClick = false;
+    if (onMobile && !MOBILE_ENABLED) {
+      debugLog("Mobile detected and mobile support disabled");
+      return;
+    }
 
-  function ensureTooltip() {
-    if (tooltip) return;
+    let tooltip = null;
+    let showTimer = null;
+    let hideTimer = null;
+    let currentTopicId = null;
+    let topicCache = {};
+    let isInsideCard = false;
+    let suppressNextClick = false;
 
-    tooltip = document.createElement("div");
-    tooltip.className = "topic-hover-card-tooltip";
-    tooltip.setAttribute("role", "tooltip");
-    tooltip.setAttribute("aria-live", "polite");
-    tooltip.style.setProperty("--thc-width", CARD_WIDTH);
-    tooltip.style.setProperty("--thc-max-h", CARD_MAX_H);
-    tooltip.style.setProperty("--thc-mobile-width", `${MOBILE_WIDTH_PERCENT}vw`);
+    function ensureTooltip() {
+      if (tooltip) return;
 
-    tooltip.addEventListener("mouseenter", () => {
-      isInsideCard = true;
+      tooltip = document.createElement("div");
+      tooltip.className = "topic-hover-card-tooltip";
+      tooltip.setAttribute("role", "tooltip");
+      tooltip.setAttribute("aria-live", "polite");
+      tooltip.style.setProperty("--thc-width", CARD_WIDTH);
+      tooltip.style.setProperty("--thc-max-h", CARD_MAX_H);
+      tooltip.style.setProperty("--thc-mobile-width", `${MOBILE_WIDTH_PERCENT}vw`);
+
+      tooltip.addEventListener("mouseenter", () => {
+        isInsideCard = true;
+        cancel(hideTimer);
+      });
+
+      tooltip.addEventListener("mouseleave", () => {
+        isInsideCard = false;
+        scheduleHide();
+      });
+
+      tooltip.addEventListener("click", (event) => {
+        const inCard = event.target.closest(".topic-hover-card");
+        if (!inCard) return;
+
+        const closeBtn = event.target.closest("[data-thc-close]");
+        if (closeBtn) {
+          event.preventDefault();
+          event.stopPropagation();
+          hideCard();
+          return;
+        }
+
+        const openBtn = event.target.closest("[data-thc-open-topic]");
+        if (openBtn) {
+          event.stopPropagation();
+          hideCard();
+          return;
+        }
+
+        if (onMobile) {
+          event.preventDefault();
+          event.stopPropagation();
+        }
+      });
+
+      document.body.appendChild(tooltip);
+    }
+
+    function positionTooltip(anchorRect) {
+      if (!tooltip || onMobile) return;
+
+      const vw = window.innerWidth;
+      const vh = window.innerHeight;
+      const cardH = tooltip.offsetHeight || 320;
+      const cardW = Math.min(
+        tooltip.offsetWidth || 512,
+        vw - VIEWPORT_MARGIN * 2
+      );
+
+      let top = anchorRect.bottom + 10;
+      let isAbove = false;
+
+      if (top + cardH > vh - VIEWPORT_MARGIN) {
+        top = anchorRect.top - cardH - 10;
+        isAbove = true;
+      }
+
+      top = Math.max(VIEWPORT_MARGIN, top);
+
+      let left = anchorRect.left;
+      if (left + cardW > vw - VIEWPORT_MARGIN) {
+        left = vw - cardW - VIEWPORT_MARGIN;
+      }
+      left = Math.max(VIEWPORT_MARGIN, left);
+
+      tooltip.style.top = `${top}px`;
+      tooltip.style.left = `${left}px`;
+      tooltip.classList.toggle("is-above", isAbove);
+    }
+
+    function showCard(topicId, anchorRect) {
+      ensureTooltip();
       cancel(hideTimer);
-    });
 
-    tooltip.addEventListener("mouseleave", () => {
-      isInsideCard = false;
+      if (
+        currentTopicId === topicId &&
+        tooltip.classList.contains("is-visible")
+      ) {
+        positionTooltip(anchorRect);
+        return;
+      }
+
+      currentTopicId = topicId;
+
+      if (topicCache[topicId]) {
+        tooltip.innerHTML = buildCardHTML(topicCache[topicId], site, onMobile);
+      } else {
+        tooltip.innerHTML = skeletonHTML();
+        fetchTopic(topicId)
+          .then((data) => {
+            if (currentTopicId === topicId) {
+              topicCache[topicId] = data;
+              tooltip.innerHTML = buildCardHTML(data, site, onMobile);
+              positionTooltip(anchorRect);
+            }
+          })
+          .catch(() => {
+            if (currentTopicId === topicId) {
+              tooltip.innerHTML =
+                `<div class="topic-hover-card topic-hover-card--density-default"><div class="topic-hover-card__body"><div class="topic-hover-card__loading">Could not load topic.</div></div></div>`;
+            }
+          });
+      }
+
+      positionTooltip(anchorRect);
+      tooltip.classList.add("is-visible");
+    }
+
+    function hideCard() {
+      if (!tooltip) return;
+      tooltip.classList.remove("is-visible");
+      later(() => {
+        if (!tooltip.classList.contains("is-visible")) {
+          currentTopicId = null;
+        }
+      }, 400);
+    }
+
+    function scheduleShow(topicId, anchorRect) {
+      cancel(showTimer);
+      cancel(hideTimer);
+      showTimer = later(() => showCard(topicId, anchorRect), DELAY_SHOW);
+    }
+
+    function scheduleHide() {
+      cancel(hideTimer);
+      hideTimer = later(() => {
+        if (!isInsideCard) hideCard();
+      }, DELAY_HIDE);
+    }
+
+    async function fetchTopic(topicId) {
+      if (topicCache[topicId]) return topicCache[topicId];
+      const data = await ajax(`/t/${topicId}.json`);
+      topicCache[topicId] = data;
+      return data;
+    }
+
+    function linkInSupportedArea(link) {
+      const inSuggested = !!link.closest(".suggested-topics");
+      if (inSuggested && settings.enable_on_suggested_topic_links) return true;
+
+      const inTopicList = !!link.closest(".topic-list");
+      if (inTopicList && settings.enable_on_topic_lists) return true;
+
+      const post = link.closest(".topic-post");
+      const inPostCooked = !!link.closest(".topic-post .cooked");
+
+      if (inPostCooked && post) {
+        const isFirstPost = post.classList.contains("topic-owner");
+        if (isFirstPost && settings.enable_on_topics) return true;
+        if (!isFirstPost && settings.enable_on_replies) return true;
+      }
+
+      return false;
+    }
+
+    function onMouseEnter(event) {
+      if (onMobile) return;
+
+      const link = event.target.closest("a[href]");
+      if (!link) return;
+      if (!linkInSupportedArea(link)) return;
+
+      const topicId = topicIdFromHref(link.href);
+      if (!topicId) return;
+
+      scheduleShow(topicId, link.getBoundingClientRect());
+    }
+
+    function onMouseLeave(event) {
+      if (onMobile) return;
+
+      const link = event.target.closest("a[href]");
+      if (!link || !topicIdFromHref(link.href)) return;
+
       scheduleHide();
-    });
+    }
 
-    tooltip.addEventListener("click", (event) => {
-      const inCard = event.target.closest(".topic-hover-card");
-      if (!inCard) return;
+    function onTouchStart(event) {
+      if (!onMobile || !MOBILE_ENABLED) return;
 
-      const closeBtn = event.target.closest("[data-thc-close]");
-      if (closeBtn) {
-        event.preventDefault();
-        event.stopPropagation();
-        hideCard();
+      if (event.target.closest(".topic-hover-card-tooltip")) {
         return;
       }
 
-      const openBtn = event.target.closest("[data-thc-open-topic]");
-      if (openBtn) {
-        event.stopPropagation();
-        hideCard();
+      const link = event.target.closest("a[href]");
+      if (!link) return;
+      if (!linkInSupportedArea(link)) return;
+
+      const topicId = topicIdFromHref(link.href);
+      if (!topicId) return;
+
+      event.preventDefault();
+      event.stopPropagation();
+      suppressNextClick = true;
+      showCard(topicId, link.getBoundingClientRect());
+    }
+
+    function onDocumentClick(event) {
+      if (!onMobile || !MOBILE_ENABLED) return;
+
+      if (suppressNextClick) {
+        const link = event.target.closest("a[href]");
+        if (link && linkInSupportedArea(link) && topicIdFromHref(link.href)) {
+          event.preventDefault();
+          event.stopPropagation();
+          suppressNextClick = false;
+          return;
+        }
+      }
+
+      if (event.target.closest(".topic-hover-card-tooltip")) {
         return;
       }
 
-      if (onMobile) {
-        event.preventDefault();
-        event.stopPropagation();
+      if (tooltip?.classList.contains("is-visible")) {
+        hideCard();
       }
-    });
+    }
 
-    document.body.appendChild(tooltip);
-  }
+    document.addEventListener("mouseover", onMouseEnter, { passive: true });
+    document.addEventListener("mouseout", onMouseLeave, { passive: true });
+    document.addEventListener("touchstart", onTouchStart, { passive: false });
+    document.addEventListener("click", onDocumentClick, true);
 
-  function positionTooltip(anchorRect) {
-    if (!tooltip || onMobile) return;
+    document.addEventListener(
+      "scroll",
+      (event) => {
+        if (
+          event.target?.closest?.(
+            ".topic-hover-card, .topic-hover-card-tooltip"
+          )
+        ) {
+          return;
+        }
 
-    const vw = window.innerWidth;
-    const vh = window.innerHeight;
-    const cardH = tooltip.offsetHeight || 320;
-    const cardW = Math.min(
-      tooltip.offsetWidth || 512,
-      vw - VIEWPORT_MARGIN * 2
+        cancel(showTimer);
+        hideCard();
+      },
+      { passive: true, capture: true }
     );
 
-    let top = anchorRect.bottom + 10;
-    let isAbove = false;
-
-    if (top + cardH > vh - VIEWPORT_MARGIN) {
-      top = anchorRect.top - cardH - 10;
-      isAbove = true;
-    }
-
-    top = Math.max(VIEWPORT_MARGIN, top);
-
-    let left = anchorRect.left;
-    if (left + cardW > vw - VIEWPORT_MARGIN) {
-      left = vw - cardW - VIEWPORT_MARGIN;
-    }
-    left = Math.max(VIEWPORT_MARGIN, left);
-
-    tooltip.style.top = `${top}px`;
-    tooltip.style.left = `${left}px`;
-    tooltip.classList.toggle("is-above", isAbove);
-  }
-
-  function showCard(topicId, anchorRect) {
-    ensureTooltip();
-    cancel(hideTimer);
-
-    if (
-      currentTopicId === topicId &&
-      tooltip.classList.contains("is-visible")
-    ) {
-      positionTooltip(anchorRect);
-      return;
-    }
-
-    currentTopicId = topicId;
-
-    if (topicCache[topicId]) {
-      tooltip.innerHTML = buildCardHTML(topicCache[topicId], site, onMobile);
-    } else {
-      tooltip.innerHTML = skeletonHTML();
-      fetchTopic(topicId)
-        .then((data) => {
-          if (currentTopicId === topicId) {
-            topicCache[topicId] = data;
-            tooltip.innerHTML = buildCardHTML(data, site, onMobile);
-            positionTooltip(anchorRect);
-          }
-        })
-        .catch(() => {
-          if (currentTopicId === topicId) {
-            tooltip.innerHTML =
-              `<div class="topic-hover-card topic-hover-card--density-default"><div class="topic-hover-card__body"><div class="topic-hover-card__loading">Could not load topic.</div></div></div>`;
-          }
-        });
-    }
-
-    positionTooltip(anchorRect);
-    tooltip.classList.add("is-visible");
-  }
-
-  function hideCard() {
-    if (!tooltip) return;
-    tooltip.classList.remove("is-visible");
-    later(() => {
-      if (!tooltip.classList.contains("is-visible")) {
-        currentTopicId = null;
-      }
-    }, 400);
-  }
-
-  function scheduleShow(topicId, anchorRect) {
-    cancel(showTimer);
-    cancel(hideTimer);
-    showTimer = later(() => showCard(topicId, anchorRect), DELAY_SHOW);
-  }
-
-  function scheduleHide() {
-    cancel(hideTimer);
-    hideTimer = later(() => {
-      if (!isInsideCard) hideCard();
-    }, DELAY_HIDE);
-  }
-
-  async function fetchTopic(topicId) {
-    if (topicCache[topicId]) return topicCache[topicId];
-    const data = await ajax(`/t/${topicId}.json`);
-    topicCache[topicId] = data;
-    return data;
-  }
-
-  function linkInSupportedArea(link) {
-    const inSuggested = !!link.closest(".suggested-topics");
-    if (inSuggested && settings.enable_on_suggested_topic_links) return true;
-
-    const inTopicList = !!link.closest(".topic-list");
-    if (inTopicList && settings.enable_on_topic_lists) return true;
-
-    const post = link.closest(".topic-post");
-    const inPostCooked = !!link.closest(".topic-post .cooked");
-
-    if (inPostCooked && post) {
-      const isFirstPost = post.classList.contains("topic-owner");
-      if (isFirstPost && settings.enable_on_topics) return true;
-      if (!isFirstPost && settings.enable_on_replies) return true;
-    }
-
-    return false;
-  }
-
-  function onMouseEnter(event) {
-    if (onMobile) return;
-
-    const link = event.target.closest("a[href]");
-    if (!link) return;
-    if (!linkInSupportedArea(link)) return;
-
-    const topicId = topicIdFromHref(link.href);
-    if (!topicId) return;
-
-    scheduleShow(topicId, link.getBoundingClientRect());
-  }
-
-  function onMouseLeave(event) {
-    if (onMobile) return;
-
-    const link = event.target.closest("a[href]");
-    if (!link || !topicIdFromHref(link.href)) return;
-
-    scheduleHide();
-  }
-
-  function onTouchStart(event) {
-    if (!onMobile || !MOBILE_ENABLED) return;
-
-    if (event.target.closest(".topic-hover-card-tooltip")) {
-      return;
-    }
-
-    const link = event.target.closest("a[href]");
-    if (!link) return;
-    if (!linkInSupportedArea(link)) return;
-
-    const topicId = topicIdFromHref(link.href);
-    if (!topicId) return;
-
-    event.preventDefault();
-    event.stopPropagation();
-    suppressNextClick = true;
-    showCard(topicId, link.getBoundingClientRect());
-  }
-
-  function onDocumentClick(event) {
-    if (!onMobile || !MOBILE_ENABLED) return;
-
-    if (suppressNextClick) {
-      const link = event.target.closest("a[href]");
-      if (link && linkInSupportedArea(link) && topicIdFromHref(link.href)) {
-        event.preventDefault();
-        event.stopPropagation();
-        suppressNextClick = false;
-        return;
-      }
-    }
-
-    if (event.target.closest(".topic-hover-card-tooltip")) {
-      return;
-    }
-
-    if (tooltip?.classList.contains("is-visible")) {
-      hideCard();
-    }
-  }
-
-  document.addEventListener("mouseover", onMouseEnter, { passive: true });
-  document.addEventListener("mouseout", onMouseLeave, { passive: true });
-  document.addEventListener("touchstart", onTouchStart, { passive: false });
-  document.addEventListener("click", onDocumentClick, true);
-
-  document.addEventListener(
-    "scroll",
-    (event) => {
-      if (
-        event.target?.closest?.(
-          ".topic-hover-card, .topic-hover-card-tooltip"
-        )
-      ) {
-        return;
-      }
-
+    api.onPageChange(() => {
       cancel(showTimer);
+      cancel(hideTimer);
       hideCard();
-    },
-    { passive: true, capture: true }
-  );
+      currentTopicId = null;
+      suppressNextClick = false;
+    });
 
-  api.onPageChange(() => {
-    cancel(showTimer);
-    cancel(hideTimer);
-    hideCard();
-    currentTopicId = null;
-    suppressNextClick = false;
-  });
+    debugLog("Hover cards initialized", {
+      onMobile,
+      mobileEnabled: MOBILE_ENABLED,
+      configuredField: USER_PREFERENCE_FIELD_NAME,
+    });
+  })();
 });
