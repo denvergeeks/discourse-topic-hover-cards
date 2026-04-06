@@ -383,17 +383,36 @@ function inKanbanView(link) {
 }
 
 function inCategoryHomepageTopicList(link) {
-  const inTopicList = !!link.closest(".topic-list");
-  if (!inTopicList) return false;
+  const href = link.getAttribute("href") || "";
+  const isTopicLink =
+    !!topicIdFromHref(link.href) || /^\/t\/(?:[^/]+\/)?\d+/.test(href);
 
-  return (
-    document.body.classList.contains("navigation-categories") ||
-    document.body.classList.contains("categories-list") ||
-    document.body.classList.contains("category-list") ||
-    !!document.querySelector(".categories-and-latest") ||
+  if (!isTopicLink) {
+    return false;
+  }
+
+  const body = document.body;
+  const html = document.documentElement;
+
+  const bodyClasses = [...body.classList];
+  const htmlClasses = [...html.classList];
+
+  const inCategoriesHomepage =
+    bodyClasses.includes("navigation-categories") ||
+    bodyClasses.includes("categories-list") ||
+    bodyClasses.includes("category-list") ||
+    htmlClasses.includes("categories") ||
+    !!document.querySelector(".categories-and-latest-topics") ||
+    !!document.querySelector(".categories-and-featured-topics") ||
+    !!document.querySelector(".categories-with-featured-topics") ||
     !!document.querySelector(".categories-only") ||
-    !!document.querySelector(".categories-with-featured-topics")
-  );
+    window.location.pathname === "/categories";
+
+  if (!inCategoriesHomepage) {
+    return false;
+  }
+
+  return true;
 }
 
 function buildCardHTML(topic, site, isMobile = false) {
@@ -853,10 +872,12 @@ export default apiInitializer((api) => {
     }
 
 function linkInSupportedArea(link) {
+  const href = link.href;
+
   const inSuggested = !!link.closest(".suggested-topics");
   if (inSuggested) {
     debugLog("Matched suggested topics branch", {
-      href: link.href,
+      href,
       bodyClasses: [...document.body.classList],
       htmlClasses: [...document.documentElement.classList],
     });
@@ -865,7 +886,7 @@ function linkInSupportedArea(link) {
 
   if (inDocCategoriesView(link)) {
     debugLog("Matched Doc Categories branch", {
-      href: link.href,
+      href,
       bodyClasses: [...document.body.classList],
       htmlClasses: [...document.documentElement.classList],
     });
@@ -874,7 +895,7 @@ function linkInSupportedArea(link) {
 
   if (inKanbanView(link)) {
     debugLog("Matched Kanban branch", {
-      href: link.href,
+      href,
       bodyClasses: [...document.body.classList],
       htmlClasses: [...document.documentElement.classList],
     });
@@ -883,19 +904,23 @@ function linkInSupportedArea(link) {
 
   if (inCategoryHomepageTopicList(link)) {
     debugLog("Matched category homepage topic list branch", {
-      href: link.href,
+      href,
+      pathname: window.location.pathname,
       bodyClasses: [...document.body.classList],
       htmlClasses: [...document.documentElement.classList],
+      settingValue: settings.enable_on_category_homepage_topic_lists,
     });
     return settings.enable_on_category_homepage_topic_lists;
   }
 
-  const inTopicList = !!link.closest(".topic-list");
+  const inTopicList = !!link.closest(".topic-list") || !!link.closest("[class*='topic-list']");
   if (inTopicList) {
     debugLog("Matched generic topic list branch", {
-      href: link.href,
+      href,
+      pathname: window.location.pathname,
       bodyClasses: [...document.body.classList],
       htmlClasses: [...document.documentElement.classList],
+      settingValue: settings.enable_on_topic_lists,
     });
     return settings.enable_on_topic_lists;
   }
@@ -907,8 +932,9 @@ function linkInSupportedArea(link) {
     const isFirstPost = post.classList.contains("topic-owner");
 
     debugLog("Matched post branch", {
-      href: link.href,
+      href,
       isFirstPost,
+      pathname: window.location.pathname,
       bodyClasses: [...document.body.classList],
       htmlClasses: [...document.documentElement.classList],
     });
@@ -921,7 +947,10 @@ function linkInSupportedArea(link) {
   }
 
   debugLog("No supported location matched", {
-    href: link.href,
+    href,
+    pathname: window.location.pathname,
+    closestTopicList: !!link.closest(".topic-list"),
+    closestAnyTopicList: !!link.closest("[class*='topic-list']"),
     bodyClasses: [...document.body.classList],
     htmlClasses: [...document.documentElement.classList],
   });
