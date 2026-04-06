@@ -57,7 +57,7 @@ mobile_thumbnail_height:
   type: integer
   default: 160
   min: 80
-  max: 320
+  max: 260
 
 show_category:
   type: bool
