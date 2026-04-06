@@ -81,8 +81,8 @@
     flex-direction: row;
 
     .topic-hover-card__thumbnail {
-      flex: 0 0 7.5rem;
-      width: 7.5rem;
+      flex: 0 0 calc(var(--thc-image-size-percent, 30) * 1%);
+      width: calc(var(--thc-image-size-percent, 30) * 1%);
       height: auto;
       min-height: 100%;
     }
@@ -90,7 +90,7 @@
     .topic-hover-card__body {
       flex: 1 1 auto;
       min-width: 0;
-      padding: 0.25rem 0.75rem;
+      padding: 0.7rem 0.85rem;
     }
   }
 
