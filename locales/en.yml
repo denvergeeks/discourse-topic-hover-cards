@@ -39,6 +39,12 @@ en:
     thumbnail_placement: "Thumbnail placement"
     thumbnail_placement_description: "Choose where the thumbnail appears on desktop. On mobile, the thumbnail is always shown at the top."
 
+    density: "Density"
+    density_description: "Controls desktop hover card density. Matches the relative options used by Density Toggle: default, cozy, and compact."
+
+    density_mobile: "Density on mobile"
+    density_mobile_description: "Controls mobile hover card density. Matches the relative options used by Density Toggle: default, cozy, and compact."
+
     image_size_percent: "Image size percent"
     image_size_percent_description: "For desktop left and right thumbnail layouts, sets the image width as a percentage of the hover card width."
 
