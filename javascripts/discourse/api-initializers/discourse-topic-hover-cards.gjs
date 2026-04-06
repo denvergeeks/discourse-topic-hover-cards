@@ -18,8 +18,8 @@ import { ajax } from "discourse/lib/ajax";
 
 const DELAY_SHOW = settings.card_delay_ms ?? 300;
 const DELAY_HIDE = 200;
-const CARD_WIDTH = settings.card_width || "24rem";
-const CARD_MAX_H = settings.card_max_height || "18rem";
+const CARD_WIDTH = settings.card_width || "32rem";
+const CARD_MAX_H = settings.card_max_height || "10rem";
 const EXCERPT_LENGTH = settings.excerpt_length ?? 3;
 const MOBILE_ENABLED = settings.enable_on_mobile ?? false;
 const VIEWPORT_MARGIN = 12;
