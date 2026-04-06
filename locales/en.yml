@@ -4,10 +4,10 @@ en:
 
   settings:
     card_width: "Card width"
-    card_width_description: "Maximum width of the hover card in pixels."
+    card_width_description: "Maximum width of the hover card. Any valid CSS width, e.g. 420px, 32rem, 40vw, clamp(18rem, 40vw, 28rem)."
 
     card_max_height: "Card max height"
-    card_max_height_description: "Maximum height of the hover card in pixels. Inner content scrolls if needed."
+    card_max_height_description: "Maximum height of the hover card. Any valid CSS max-height, e.g. 480px, 60vh, 32rem, min(70vh, 560px). Inner content scrolls if needed."
 
     card_delay_ms: "Hover delay"
     card_delay_ms_description: "Delay in milliseconds before the hover card appears."
@@ -29,6 +29,9 @@ en:
 
     show_excerpt: "Show excerpt"
     show_excerpt_description: "Display a cleaned excerpt from the topic, excluding image metadata and captions."
+
+    excerpt_length: "Excerpt length"
+    excerpt_length_description: "The number of lines for the excerpt. Valid range is 1 to 12."
 
     show_op: "Show original poster"
     show_op_description: "Display the original poster avatar and username."
