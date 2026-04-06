@@ -5,12 +5,12 @@
 # --- Card dimensions ---
 card_width:
   type: string
-  default: 24rem
+  default: 32rem
   description: "Any valid CSS width, e.g. 420px, 32rem, 40vw, clamp(18rem, 40vw, 28rem)"
 
 card_max_height:
   type: string
-  default: 18rem
+  default: 12rem
   description: "Any valid CSS max-height, e.g. 480px, 60vh, 32rem, min(70vh, 560px)"
 
 # --- Behaviour ---
