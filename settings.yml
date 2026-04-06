@@ -178,3 +178,11 @@ show_activity:
 show_activity_mobile:
   type: bool
   default: false
+
+debug_mode:
+  type: bool
+  default: false
+
+resolve_user_field_id_for_admins:
+  type: bool
+  default: true
