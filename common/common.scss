@@ -84,42 +84,40 @@
 
 .topic-hover-card--thumb-left,
 .topic-hover-card--thumb-right {
-  display: grid;
-  min-height: 0;
+  display: flex;
+  flex-direction: row;
   align-items: stretch;
-  column-gap: 0.75rem;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+  min-height: 0;
+  max-height: var(--thc-max-h, 10rem);
+}
 
-  &.topic-hover-card--thumb-left {
-    grid-template-columns:
-      minmax(0, var(--thc-image-size-percent, 30%))
-      minmax(0, 1fr);
-  }
+.topic-hover-card--thumb-left .topic-hover-card__thumbnail,
+.topic-hover-card--thumb-right .topic-hover-card__thumbnail {
+  flex: 0 0 calc(var(--thc-image-size-percent, 30) * 1%);
+  width: calc(var(--thc-image-size-percent, 30) * 1%);
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
 
-  &.topic-hover-card--thumb-right {
-    grid-template-columns:
-      minmax(0, 1fr)
-      minmax(0, var(--thc-image-size-percent, 30%));
-  }
+.topic-hover-card--thumb-left .topic-hover-card__thumbnail img,
+.topic-hover-card--thumb-right .topic-hover-card__thumbnail img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
 
-  .topic-hover-card__thumbnail {
-    min-width: 0;
-    min-height: 0;
-    overflow: hidden;
-  }
+.topic-hover-card--thumb-left .topic-hover-card__body,
+.topic-hover-card--thumb-right .topic-hover-card__body {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
 
-  .topic-hover-card__thumbnail img {
-    display: block;
-    width: 100%;
-    height: 100%;
-    max-height: 100%;
-    object-fit: cover;
-  }
-
-  .topic-hover-card__body {
-    min-width: 0;
-    min-height: 0;
-  }
+.topic-hover-card--thumb-right {
+  flex-direction: row-reverse;
 }
 
 // Mobile thumbnail height override
@@ -177,6 +175,7 @@
 .topic-hover-card__category {
   font-size: 0.75em;
   overflow: hidden;
+  min-width: 0;
 }
 
 .topic-hover-card__category-badge {
@@ -197,6 +196,7 @@
   flex-wrap: wrap;
   gap: 0.2rem;
   overflow: hidden;
+  min-width: 0;
 }
 
 .topic-hover-card__tag {
@@ -213,6 +213,7 @@
   line-height: 1.3;
   font-size: 0.98em;
   overflow: hidden;
+  min-width: 0;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
@@ -222,6 +223,7 @@
 .topic-hover-card__excerpt {
   font-size: 0.9em;
   line-height: 1.4;
+  min-width: 0;
   display: -webkit-box;
   -webkit-line-clamp: var(--thc-excerpt-lines, 3);
   -webkit-box-orient: vertical;
@@ -238,6 +240,7 @@
   font-size: 0.8em;
   color: var(--primary-medium, $primary-medium);
   overflow: hidden;
+  min-width: 0;
 }
 
 .topic-hover-card__op {
@@ -269,6 +272,7 @@
   gap: 0.35rem;
   font-size: 0.8em;
   overflow: hidden;
+  min-width: 0;
 }
 
 .topic-hover-card__stat {
