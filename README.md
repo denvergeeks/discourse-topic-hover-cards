@@ -158,7 +158,8 @@ Then set the component setting:
 user_preference_field_name = disable_topic_hover_cards
 ```
 
-The field key on your site must match the value configured in the theme setting.
+The field key on your site must match the value configured in the theme setting. Set this to the custom user field key you want to use, such as disable_topic_hover_cards.
+Note: On some sites, Discourse may expose the field as user_field_X based on the site-specific field ID, and this component will try to resolve that automatically for admins.
 
 ## Mobile behavior
 
