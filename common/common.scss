@@ -162,10 +162,17 @@
   }
 
   .topic-hover-card__metadata,
-  .topic-hover-card__stats,
-  .topic-hover-card__badges,
-  .topic-hover-card__tags {
+  .topic-hover-card__stats {
     gap: 0.2rem;
+  }
+
+  .topic-hover-card__badges {
+    --thc-badge-fade: 1rem;
+    gap: 0.2rem;
+  }
+
+  .topic-hover-card__tags {
+    gap: 0.16rem;
   }
 }
 
@@ -258,27 +265,49 @@
 }
 
 .topic-hover-card__badges {
+  --thc-badge-fade: 1.5rem;
+
   display: flex;
   align-items: center;
   gap: 0.25rem;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   min-width: 0;
+  width: 100%;
   overflow: hidden;
   color: var(--primary-medium, $primary-medium);
+
+  -webkit-mask-image: linear-gradient(
+    to right,
+    #000 0,
+    #000 calc(100% - var(--thc-badge-fade)),
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    to right,
+    #000 0,
+    #000 calc(100% - var(--thc-badge-fade)),
+    transparent 100%
+  );
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
 }
 
 .topic-hover-card__category {
   font-size: 1em;
   display: inline-flex;
   align-items: center;
+  flex: 0 1 auto;
   min-width: 0;
-  max-width: 100%;
+  max-width: 45%;
   overflow: hidden;
 }
 
 .topic-hover-card__category-badge {
   display: inline-flex;
   align-items: center;
+  min-width: 0;
   max-width: 100%;
   padding: 0.1rem 0.4rem;
   border-radius: 999px;
@@ -292,16 +321,19 @@
 .topic-hover-card__tags {
   display: flex;
   align-items: center;
-  flex-wrap: wrap;
   gap: 0.2rem;
+  flex-wrap: nowrap;
+  flex: 1 1 auto;
   min-width: 0;
   overflow: hidden;
-  flex: 1 1 auto;
 }
 
 .topic-hover-card__tag {
   display: inline-flex;
   align-items: center;
+  flex: 0 1 auto;
+  min-width: 0;
+  max-width: 100%;
   font-size: 1em;
   line-height: 1;
   padding: 0.12rem 0.32rem;
@@ -311,7 +343,13 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 100%;
+}
+
+@supports not ((mask-image: linear-gradient(#000, transparent))) {
+  .topic-hover-card__badges {
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
 }
 
 .topic-hover-card__mobile-actions {
