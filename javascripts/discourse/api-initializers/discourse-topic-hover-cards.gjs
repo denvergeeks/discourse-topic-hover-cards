@@ -9,18 +9,13 @@ import { ajax } from "discourse/lib/ajax";
 // or reply body, topic lists, or suggested topics.
 //
 // On mobile (touch devices) the card opens on tap when
-// enable_on_mobile is true, and a second tap navigates.
-// Thumbnail placement is configurable on desktop, but
-// forced to "top" on mobile for simpler layout.
-// Width and max-height accept any valid CSS value.
+// enable_on_mobile is true.
 // -------------------------------------------------------
 
 const DELAY_SHOW = settings.card_delay_ms ?? 300;
 const DELAY_HIDE = 200;
 const CARD_WIDTH = settings.card_width || "32rem";
 const CARD_MAX_H = settings.card_max_height || "10rem";
-const EXCERPT_LENGTH = settings.excerpt_length ?? 3;
-const IMAGE_SIZE_PERCENT = settings.image_size_percent ?? 30;
 const MOBILE_ENABLED = settings.enable_on_mobile ?? false;
 const VIEWPORT_MARGIN = 12;
 
@@ -90,10 +85,12 @@ function dIconSVG(name) {
       "M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z",
     clock:
       "M12 2a10 10 0 1 0 0 20A10 10 0 0 0 12 2zm0 18a8 8 0 1 1 0-16 8 8 0 0 1 0 16zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67V7z",
+    close:
+      "M18 6 6 18M6 6l12 12",
   };
 
   const d = paths[name] ?? "";
-  return `<svg class="d-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${d}"/></svg>`;
+  return `<svg class="d-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${d}"/></svg>`;
 }
 
 function findCategoryById(site, categoryId) {
@@ -125,19 +122,52 @@ function normalizeTag(tag) {
   return String(tag);
 }
 
+function mobileBool(name, mobileName, isMobile) {
+  return isMobile ? settings[mobileName] : settings[name];
+}
+
+function mobileInt(name, mobileName, fallback, isMobile) {
+  return isMobile
+    ? settings[mobileName] ?? settings[name] ?? fallback
+    : settings[name] ?? fallback;
+}
+
 function buildCardHTML(topic, site, isMobile = false) {
+  const topicUrl = `${window.location.origin}/t/${topic.slug || topic.id}/${topic.id}`;
+
+  const showThumbnail = mobileBool("show_thumbnail", "show_thumbnail_mobile", isMobile);
+  const showCategory = mobileBool("show_category", "show_category_mobile", isMobile);
+  const showTags = mobileBool("show_tags", "show_tags_mobile", isMobile);
+  const showTitle = mobileBool("show_title", "show_title_mobile", isMobile);
+  const showExcerpt = mobileBool("show_excerpt", "show_excerpt_mobile", isMobile);
+  const showOp = mobileBool("show_op", "show_op_mobile", isMobile);
+  const showPublishDate = mobileBool("show_publish_date", "show_publish_date_mobile", isMobile);
+  const showViews = mobileBool("show_views", "show_views_mobile", isMobile);
+  const showReplyCount = mobileBool("show_reply_count", "show_reply_count_mobile", isMobile);
+  const showLikes = mobileBool("show_likes", "show_likes_mobile", isMobile);
+  const showActivity = mobileBool("show_activity", "show_activity_mobile", isMobile);
+
+  const excerptLength = mobileInt("excerpt_length", "excerpt_length_mobile", 3, isMobile);
+  const imageSizePercent = mobileInt("image_size_percent", "image_size_percent_mobile", 30, isMobile);
+
   const configuredPlacement = settings.thumbnail_placement || "left";
   const placement = isMobile ? "top" : configuredPlacement;
 
+  const mobileCloseButton = isMobile
+    ? `<button class="topic-hover-card__close" type="button" data-thc-close aria-label="Close preview">
+         ${dIconSVG("close")}
+       </button>`
+    : "";
+
   const thumbnail =
-    topic.image_url && settings.show_thumbnail
+    topic.image_url && showThumbnail
       ? `<div class="topic-hover-card__thumbnail">
            <img src="${topic.image_url}" alt="" loading="lazy">
          </div>`
       : "";
 
   let categoryHTML = "";
-  if (settings.show_category && topic.category_id) {
+  if (showCategory && topic.category_id) {
     const category = findCategoryById(site, topic.category_id);
 
     const name =
@@ -165,7 +195,7 @@ function buildCardHTML(topic, site, isMobile = false) {
   }
 
   let tagsHTML = "";
-  if (settings.show_tags && Array.isArray(topic.tags) && topic.tags.length) {
+  if (showTags && Array.isArray(topic.tags) && topic.tags.length) {
     const normalizedTags = topic.tags
       .map((tag) => normalizeTag(tag))
       .filter(Boolean);
@@ -185,7 +215,7 @@ function buildCardHTML(topic, site, isMobile = false) {
 
   const title = topic.fancy_title ?? topic.title ?? "(no title)";
 
-  const titleHTML = settings.show_title
+  const titleHTML = showTitle
     ? `<div class="topic-hover-card__title">${title}</div>`
     : "";
 
@@ -200,18 +230,18 @@ function buildCardHTML(topic, site, isMobile = false) {
   const finalExcerpt = cleanedExcerpt.length >= 20 ? cleanedExcerpt : "";
 
   const excerpt =
-    settings.show_excerpt && finalExcerpt
-      ? `<div class="topic-hover-card__excerpt">${finalExcerpt}</div>`
+    showExcerpt && finalExcerpt
+      ? `<div class="topic-hover-card__excerpt" style="--thc-excerpt-lines:${excerptLength};">${finalExcerpt}</div>`
       : "";
 
   let opHTML = "";
-  if (settings.show_op) {
+  if (showOp) {
     const op =
       topic.details?.created_by ||
-      topic.post_stream?.posts?.[0]?.username && {
+      (topic.post_stream?.posts?.[0]?.username && {
         username: topic.post_stream.posts[0].username,
         avatar_template: topic.post_stream.posts[0].avatar_template,
-      } ||
+      }) ||
       topic.posters?.[0]?.user;
 
     if (op) {
@@ -229,7 +259,7 @@ function buildCardHTML(topic, site, isMobile = false) {
   }
 
   let publishDate = "";
-  if (settings.show_publish_date && topic.created_at) {
+  if (showPublishDate && topic.created_at) {
     const d = new Date(topic.created_at);
     const fmt = d.toLocaleDateString(undefined, {
       year: "numeric",
@@ -241,26 +271,26 @@ function buildCardHTML(topic, site, isMobile = false) {
 
   const statItems = [];
 
-  if (settings.show_views) {
+  if (showViews) {
     statItems.push(
       `<span class="topic-hover-card__stat">${dIconSVG("eye")} ${fmtNum(topic.views)}</span>`
     );
   }
 
-  if (settings.show_reply_count) {
+  if (showReplyCount) {
     statItems.push(
       `<span class="topic-hover-card__stat">${dIconSVG("comment")} ${fmtNum(topic.reply_count ?? topic.posts_count - 1)}</span>`
     );
   }
 
-  if (settings.show_likes) {
+  if (showLikes) {
     const likes = topic.like_count ?? topic.topic_post_like_count ?? 0;
     statItems.push(
       `<span class="topic-hover-card__stat">${dIconSVG("heart")} ${fmtNum(likes)}</span>`
     );
   }
 
-  if (settings.show_activity && topic.last_posted_at) {
+  if (showActivity && topic.last_posted_at) {
     const d = new Date(topic.last_posted_at);
     const fmt = d.toLocaleDateString(undefined, {
       month: "short",
@@ -282,24 +312,30 @@ function buildCardHTML(topic, site, isMobile = false) {
     ? `<div class="topic-hover-card__metadata">${metadataItems}</div>`
     : "";
 
-  const tapHint =
-    isMobile && MOBILE_ENABLED
-      ? `<div class="topic-hover-card__tap-hint">Tap the link again to open</div>`
-      : "";
+  const mobileActions = isMobile
+    ? `<div class="topic-hover-card__mobile-actions">
+         <a class="btn btn-primary topic-hover-card__open-topic" href="${topicUrl}" data-thc-open-topic>
+           Open topic
+         </a>
+       </div>`
+    : "";
 
   const bodyInner = `
+      ${mobileCloseButton}
       ${categoryHTML}
       ${tagsHTML}
       ${titleHTML}
       ${excerpt}
       ${metadata}
-      ${tapHint}
+      ${mobileActions}
   `;
+
+  const wrapperStyle = `style="--thc-image-size-percent:${imageSizePercent};"`;
 
   switch (placement) {
     case "left":
       return `
-        <div class="topic-hover-card topic-hover-card--thumb-left">
+        <div class="topic-hover-card topic-hover-card--thumb-left" ${wrapperStyle}>
           ${thumbnail}
           <div class="topic-hover-card__body">
             ${bodyInner}
@@ -308,7 +344,7 @@ function buildCardHTML(topic, site, isMobile = false) {
 
     case "right":
       return `
-        <div class="topic-hover-card topic-hover-card--thumb-right">
+        <div class="topic-hover-card topic-hover-card--thumb-right" ${wrapperStyle}>
           ${thumbnail}
           <div class="topic-hover-card__body">
             ${bodyInner}
@@ -317,7 +353,7 @@ function buildCardHTML(topic, site, isMobile = false) {
 
     case "bottom":
       return `
-        <div class="topic-hover-card topic-hover-card--thumb-bottom">
+        <div class="topic-hover-card topic-hover-card--thumb-bottom" ${wrapperStyle}>
           <div class="topic-hover-card__body">
             ${bodyInner}
           </div>
@@ -327,7 +363,7 @@ function buildCardHTML(topic, site, isMobile = false) {
     case "top":
     default:
       return `
-        <div class="topic-hover-card topic-hover-card--thumb-top">
+        <div class="topic-hover-card topic-hover-card--thumb-top" ${wrapperStyle}>
           ${thumbnail}
           <div class="topic-hover-card__body">
             ${bodyInner}
@@ -361,8 +397,6 @@ export default apiInitializer((api) => {
     tooltip.setAttribute("aria-live", "polite");
     tooltip.style.setProperty("--thc-width", CARD_WIDTH);
     tooltip.style.setProperty("--thc-max-h", CARD_MAX_H);
-    tooltip.style.setProperty("--thc-excerpt-lines", String(EXCERPT_LENGTH));
-    tooltip.style.setProperty("--thc-image-size-percent", String(IMAGE_SIZE_PERCENT));
 
     tooltip.addEventListener("mouseenter", () => {
       isInsideCard = true;
@@ -372,6 +406,22 @@ export default apiInitializer((api) => {
     tooltip.addEventListener("mouseleave", () => {
       isInsideCard = false;
       scheduleHide();
+    });
+
+    tooltip.addEventListener("click", (event) => {
+      const closeBtn = event.target.closest("[data-thc-close]");
+      if (closeBtn) {
+        event.preventDefault();
+        hideCard();
+        mobileTappedLink = null;
+        return;
+      }
+
+      const openBtn = event.target.closest("[data-thc-open-topic]");
+      if (openBtn) {
+        hideCard();
+        mobileTappedLink = null;
+      }
     });
 
     document.body.appendChild(tooltip);
@@ -542,15 +592,6 @@ export default apiInitializer((api) => {
 
     const topicId = topicIdFromHref(link.href);
     if (!topicId) return;
-
-    if (
-      mobileTappedLink === link &&
-      tooltip?.classList.contains("is-visible")
-    ) {
-      hideCard();
-      mobileTappedLink = null;
-      return;
-    }
 
     event.preventDefault();
     mobileTappedLink = link;
