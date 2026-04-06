@@ -41,7 +41,7 @@ image_size_percent:
   default: 30
   min: 15
   max: 60
-  description: "Image size as % of the Hover Card width. Valid range is 15 to 60. (For left and right thumbnail placements. Top and bottom placements are fixed at 100%)."
+  description: "The thumbnail size as % of the Hover Card width. Valid range is 15 to 60. (For left and right thumbnail placements. Top and bottom placements are fixed at 100%)."
 
 show_title:
   type: bool
@@ -56,7 +56,7 @@ excerpt_length:
   default: 3
   min: 1
   max: 12
-  description: "Number of lines for the excerpt. Valid range is 1 to 12."
+  description: "The number of lines for the excerpt. Valid range is 1 to 12."
 
 show_op:
   type: bool
