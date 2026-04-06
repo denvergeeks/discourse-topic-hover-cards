@@ -9,7 +9,7 @@ const CARD_MAX_H = settings.card_max_height || "10rem";
 const MOBILE_ENABLED = settings.enable_on_mobile ?? false;
 const MOBILE_WIDTH_PERCENT = settings.mobile_width_percent ?? 100;
 const USER_PREFERENCE_FIELD_NAME =
-  settings.user_preference_field_name || "disable_topic_hover_cards";
+  settings.user_preference_field_name || "user_field_1";
 const DEBUG_MODE = settings.debug_mode ?? false;
 const RESOLVE_USER_FIELD_ID_FOR_ADMINS =
   settings.resolve_user_field_id_for_admins ?? true;
@@ -199,10 +199,13 @@ async function resolveUserFieldIdForAdmins(currentUser) {
       const wanted = String(USER_PREFERENCE_FIELD_NAME).trim().toLowerCase();
 
       const match = fields.find((field) => {
-        const fieldName = String(field?.name || "").trim().toLowerCase();
-        const userFieldKey = `user_field_${field?.id}`.toLowerCase();
-
-        return fieldName === wanted || userFieldKey === wanted;
+        const id = field?.id;
+        const name = String(field?.name || "").trim().toLowerCase();
+        return (
+          name === wanted ||
+          `user_field_${id}` === wanted ||
+          String(id) === wanted
+        );
       });
 
       resolvedUserFieldId = match?.id ?? null;
@@ -210,8 +213,6 @@ async function resolveUserFieldIdForAdmins(currentUser) {
       debugLog("Resolved admin user-field mapping", {
         configuredField: USER_PREFERENCE_FIELD_NAME,
         resolvedUserFieldId,
-        resolvedUserFieldKey:
-          resolvedUserFieldId !== null ? `user_field_${resolvedUserFieldId}` : null,
       });
 
       return resolvedUserFieldId;
@@ -228,26 +229,40 @@ async function resolveUserFieldIdForAdmins(currentUser) {
   return resolvedUserFieldIdPromise;
 }
 
-async function hoverCardsDisabledForUser(currentUser) {
+async function fetchFullCurrentUser(api, currentUser) {
+  if (!currentUser?.username) return null;
+
+  try {
+    const store = api.container.lookup("store:main");
+    const user = await store.find("user", currentUser.username);
+    return user || null;
+  } catch (error) {
+    debugLog("Could not fetch full current user record", error);
+    return null;
+  }
+}
+
+async function hoverCardsDisabledForUser(api, currentUser) {
   if (!currentUser || !USER_PREFERENCE_FIELD_NAME) return false;
 
-  const customFields = currentUser?.custom_fields || {};
-  const userFields = currentUser?.user_fields || {};
   const directCandidates = normalizedFieldKeyVariants(
     USER_PREFERENCE_FIELD_NAME
   );
 
+  const currentUserCustomFields = currentUser?.custom_fields || {};
+  const currentUserUserFields = currentUser?.user_fields || {};
+
   let match =
-    findTruthyFieldMatch(customFields, directCandidates) ||
-    findTruthyFieldMatch(userFields, directCandidates);
+    findTruthyFieldMatch(currentUserCustomFields, directCandidates) ||
+    findTruthyFieldMatch(currentUserUserFields, directCandidates);
 
   if (match) {
-    debugLog("Disable field matched directly", {
+    debugLog("Disable field matched on currentUser", {
       configuredField: USER_PREFERENCE_FIELD_NAME,
       matchedKey: match.key,
       value: match.value,
       source:
-        match.key in customFields
+        match.key in currentUserCustomFields
           ? "currentUser.custom_fields"
           : "currentUser.user_fields",
     });
@@ -255,24 +270,23 @@ async function hoverCardsDisabledForUser(currentUser) {
   }
 
   const resolvedId = await resolveUserFieldIdForAdmins(currentUser);
+  const resolvedCandidates = resolvedId
+    ? normalizedFieldKeyVariants(resolvedId)
+    : [];
 
-  if (resolvedId) {
-    const resolvedCandidates = normalizedFieldKeyVariants(
-      `user_field_${resolvedId}`
-    );
-
+  if (resolvedCandidates.length) {
     match =
-      findTruthyFieldMatch(customFields, resolvedCandidates) ||
-      findTruthyFieldMatch(userFields, resolvedCandidates);
+      findTruthyFieldMatch(currentUserCustomFields, resolvedCandidates) ||
+      findTruthyFieldMatch(currentUserUserFields, resolvedCandidates);
 
     if (match) {
-      debugLog("Disable field matched via resolved numeric field ID", {
+      debugLog("Disable field matched on currentUser via resolved ID", {
         configuredField: USER_PREFERENCE_FIELD_NAME,
         resolvedId,
         matchedKey: match.key,
         value: match.value,
         source:
-          match.key in customFields
+          match.key in currentUserCustomFields
             ? "currentUser.custom_fields"
             : "currentUser.user_fields",
       });
@@ -280,12 +294,49 @@ async function hoverCardsDisabledForUser(currentUser) {
     }
   }
 
-  debugLog("No disable field match found", {
+  const fullUser = await fetchFullCurrentUser(api, currentUser);
+  const fullUserFields = fullUser?.user_fields || {};
+  const fullUserCustomFields = fullUser?.custom_fields || {};
+
+  match =
+    findTruthyFieldMatch(fullUserFields, directCandidates) ||
+    findTruthyFieldMatch(fullUserCustomFields, directCandidates);
+
+  if (match) {
+    debugLog("Disable field matched on fetched full user", {
+      configuredField: USER_PREFERENCE_FIELD_NAME,
+      matchedKey: match.key,
+      value: match.value,
+      source: match.key in fullUserFields ? "user.user_fields" : "user.custom_fields",
+    });
+    return true;
+  }
+
+  if (resolvedCandidates.length) {
+    match =
+      findTruthyFieldMatch(fullUserFields, resolvedCandidates) ||
+      findTruthyFieldMatch(fullUserCustomFields, resolvedCandidates);
+
+    if (match) {
+      debugLog("Disable field matched on fetched full user via resolved ID", {
+        configuredField: USER_PREFERENCE_FIELD_NAME,
+        resolvedId,
+        matchedKey: match.key,
+        value: match.value,
+        source: match.key in fullUserFields ? "user.user_fields" : "user.custom_fields",
+      });
+      return true;
+    }
+  }
+
+  debugLog("No disable field match found anywhere", {
     configuredField: USER_PREFERENCE_FIELD_NAME,
     directCandidates,
-    resolvedUserFieldId,
-    availableCustomFieldKeys: Object.keys(customFields || {}),
-    availableUserFieldKeys: Object.keys(userFields || {}),
+    resolvedCandidates,
+    currentUserCustomFieldKeys: Object.keys(currentUserCustomFields),
+    currentUserUserFieldKeys: Object.keys(currentUserUserFields),
+    fullUserFieldKeys: Object.keys(fullUserFields),
+    fullUserCustomFieldKeys: Object.keys(fullUserCustomFields),
   });
 
   return false;
@@ -404,6 +455,7 @@ function buildCardHTML(topic, site, isMobile = false) {
   }
 
   const title = topic.fancy_title ?? topic.title ?? "(no title)";
+
   const titleHTML = showTitle
     ? `<div class="topic-hover-card__title">${title}</div>`
     : "";
@@ -570,7 +622,7 @@ export default apiInitializer((api) => {
   const onMobile = site.mobileView || isTouchDevice();
 
   (async () => {
-    const isDisabled = await hoverCardsDisabledForUser(currentUser);
+    const isDisabled = await hoverCardsDisabledForUser(api, currentUser);
 
     if (isDisabled) {
       debugLog("Hover cards disabled for current user");
@@ -645,7 +697,10 @@ export default apiInitializer((api) => {
       const vw = window.innerWidth;
       const vh = window.innerHeight;
       const cardH = tooltip.offsetHeight || 320;
-      const cardW = Math.min(tooltip.offsetWidth || 512, vw - VIEWPORT_MARGIN * 2);
+      const cardW = Math.min(
+        tooltip.offsetWidth || 512,
+        vw - VIEWPORT_MARGIN * 2
+      );
 
       let top = anchorRect.bottom + 10;
       let isAbove = false;
