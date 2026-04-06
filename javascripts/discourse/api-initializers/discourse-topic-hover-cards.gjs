@@ -929,7 +929,8 @@ export default apiInitializer((api) => {
 
       const link = event.target.closest("a[href]");
       if (!link) return;
-      if (!linkInSupportedArea(link)) return;
+// TEMP TEST
+// if (!linkInSupportedArea(link)) return;
 
       const topicId = topicIdFromHref(link.href);
       if (!topicId) return;
