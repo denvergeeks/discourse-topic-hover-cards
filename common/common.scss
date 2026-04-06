@@ -77,10 +77,11 @@
     flex-direction: row;
 
     .topic-hover-card__thumbnail {
-      flex: 0 0 calc(var(--thc-image-size-percent, 30) * 1%);
-      width: calc(var(--thc-image-size-percent, 30) * 1%);
-      height: auto;
-      min-height: 100%;
+      order: 0 !important;
+      width: 100% !important;
+      height: var(--thc-mobile-image-height, 160px) !important;
+      min-height: 0 !important;
+      flex: 0 0 var(--thc-mobile-image-height, 160px) !important;
     }
 
     .topic-hover-card__body {
