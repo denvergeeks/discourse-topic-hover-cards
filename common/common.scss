@@ -143,7 +143,7 @@
 
   &__excerpt {
     color: var(--primary-medium);
-    font-size: var(--font-down-1-rem);
+    font-size: var(--font-down-2-rem);
     line-height: 1.15;
     display: -webkit-box;
     -webkit-line-clamp: var(--thc-excerpt-lines, 3);
@@ -170,7 +170,7 @@
     align-items: center;
     gap: 0.4rem;
     color: var(--primary-medium);
-    font-size: var(--font-down-1-rem);
+    font-size: var(--font-down-2-rem);
     flex: 0 1 auto;
     min-width: 0;
 
@@ -212,7 +212,7 @@
     display: flex;
     align-items: center;
     gap: 0.25rem;
-    font-size: var(--font-down-1-rem);
+    font-size: var(--font-down-2-rem);
     font-weight: 600;
     white-space: nowrap;
 
@@ -271,7 +271,7 @@
 
       &.meta {
         width: 45%;
-        height: 0.75em;
+        height: 0.5em;
       }
     }
   }
