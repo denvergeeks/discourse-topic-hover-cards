@@ -497,11 +497,11 @@ function buildCardHTML(topic, site, isMobile = false) {
 
     if (name) {
       categoryHTML = `
-        <div class="topic-hover-card__category">
+        <span class="topic-hover-card__category">
           <span class="topic-hover-card__category-badge" style="--thc-category-color: ${color};">
             ${name}
           </span>
-        </div>
+        </span>
       `;
     }
   }
@@ -523,6 +523,11 @@ function buildCardHTML(topic, site, isMobile = false) {
     }
   }
 
+  const badgesHTML =
+    categoryHTML || tagsHTML
+      ? `<div class="topic-hover-card__badges">${categoryHTML}${tagsHTML}</div>`
+      : "";
+
   const title = topic.fancy_title ?? topic.title ?? "(no title)";
 
   const titleHTML = showTitle
@@ -533,11 +538,11 @@ function buildCardHTML(topic, site, isMobile = false) {
   const excerptSource =
     topic.excerpt || firstPost?.excerpt || firstPost?.cooked || "";
   const cleanedExcerpt = stripHtml(excerptSource);
+  const limit = isMobile ? 180 : 260;
   const finalExcerpt =
     cleanedExcerpt.length >= 20
-      ? `${cleanedExcerpt.slice(0, isMobile ? 180 : 260).trim()}${
-          cleanedExcerpt.length > (isMobile ? 180 : 260) ? "…" : ""
-        }`
+      ? cleanedExcerpt.slice(0, limit).trim() +
+        (cleanedExcerpt.length > limit ? "…" : "")
       : "";
 
   const excerpt =
@@ -639,11 +644,10 @@ function buildCardHTML(topic, site, isMobile = false) {
 
   const bodyInner = `
       ${mobileCloseButton}
-      ${categoryHTML}
-      ${tagsHTML}
       ${titleHTML}
       ${excerpt}
       ${metadata}
+      ${badgesHTML}
       ${mobileActions}
   `;
 
