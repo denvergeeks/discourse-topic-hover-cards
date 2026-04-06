@@ -39,8 +39,8 @@ en:
     image_size_percent: "Image size percent"
     image_size_percent_description: "For desktop left and right thumbnail layouts, sets the image width as a percentage of the hover card width."
 
-    image_size_percent_mobile: "Image size percent on mobile"
-    image_size_percent_mobile_description: "For mobile layouts, sets the image width percentage value used by the card."
+    image_size_percent_mobile: "Mobile thumbnail height"
+    image_size_percent_mobile_description: "Controls the thumbnail height on mobile bottom-sheet previews. Higher values make the image taller."
 
     show_category: "Show category"
     show_category_description: "Display the topic category badge on desktop when category data is available."
