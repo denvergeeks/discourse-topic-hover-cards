@@ -171,7 +171,7 @@
     font-size: var(--font-0-rem);
     font-weight: bold;
     color: var(--primary);
-    line-height: 1.35;
+    line-height: 1.15;
     margin-bottom: 0.4rem;
     display: -webkit-box;
     -webkit-line-clamp: 2;
@@ -182,13 +182,13 @@
 
   &__excerpt {
     color: var(--primary-medium);
-    line-height: 1.45;
+    line-height: 1.15;
     display: -webkit-box;
     -webkit-line-clamp: var(--thc-excerpt-lines, 3);
     -webkit-box-orient: vertical;
     overflow: hidden;
     text-overflow: ellipsis;
-    margin-bottom: 0.6rem;
+    margin-bottom: 0.5rem;
   }
 
   &__metadata {
@@ -392,8 +392,8 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 2rem;
-    height: 2rem;
+    width: 2.5rem;
+    height: 2.5rem;
     border-radius: 999px;
     background: rgba(170, 35, 35, 0.12);
     color: #b02121;
