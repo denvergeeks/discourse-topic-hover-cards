@@ -252,7 +252,7 @@ async function fetchFullCurrentUser(api, currentUser) {
   if (!currentUser?.username) return null;
 
   try {
-    const store = api.container.lookup("store:main");
+    const store = api.container.lookup("service:store");
     const user = await store.find("user", currentUser.username);
     return user || null;
   } catch (error) {
