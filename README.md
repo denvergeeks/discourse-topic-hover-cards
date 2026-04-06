@@ -30,23 +30,10 @@ When users hover a topic link (or tap on mobile), a card appears with the topic 
   - Views, replies, likes, last activity
 - Per-user opt-out using a custom user field
 - Admin-only debug mode for safe troubleshooting
-
----
-
-## Installation
-
-1. Go to **Admin → Customize → Themes → Components**.
-2. Click **Install** and add the git repository URL for this component.
-3. Once installed, add the component to the themes you want it active on.
-4. (Optional) Make the theme user-selectable while testing, so only you see changes. [web:580]
-
-For theme/component structure and git-based installs, see **Structure of themes and theme components** in the Discourse developer docs. [web:409]
-
+- 
 ---
 
 ## Settings
-
-All settings are under **Admin → Customize → Themes → [this component] → Settings**. [web:22]
 
 ### Layout & timing
 
