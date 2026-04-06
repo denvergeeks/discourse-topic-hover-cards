@@ -146,9 +146,9 @@ Current defaults:
 
 ## How it works
 
-The component listens for hover events on internal topic links and checks whether the hovered link is inside one of the enabled areas. It then fetches the topic JSON from Discourse using the topic ID from the link URL, builds a preview card, and displays it in a floating tooltip. Discourse theme components commonly use API initializers and repository-based settings files for this kind of behavior. [web:22][web:78][web:71]
+The component listens for hover events on internal topic links and checks whether the hovered link is inside one of the enabled areas. It then fetches the topic JSON from Discourse using the topic ID from the link URL, builds a preview card, and displays it in a floating tooltip. Discourse theme components commonly use API initializers and repository-based settings files for this kind of behavior.
 
-The card is positioned below the hovered link by default, and automatically flips above the link when there is not enough room below it. The card also clamps itself within the viewport horizontally so it does not render off-screen. [web:78]
+The card is positioned below the hovered link by default, and automatically flips above the link when there is not enough room below it. The card also clamps itself within the viewport horizontally so it does not render off-screen.
 
 ## Content sources
 
@@ -202,16 +202,16 @@ discourse-topic-hover-cards/
 
 ## Compatibility
 
-This component is intended for modern Discourse versions and should be used as a remote theme component with current Discourse theme APIs. Theme components are the preferred packaging format for focused UI enhancements like this. [web:371][web:364]
+This component is intended for modern Discourse versions and should be used as a remote theme component with current Discourse theme APIs. Theme components are the preferred packaging format for focused UI enhancements like this.
 
 ## Development
 
 If you are developing this locally:
 
-- Keep settings in `settings.yml` because Discourse theme settings are defined repository-side rather than through the admin code editor. [web:22]
-- Keep JavaScript in the `javascripts/discourse/api-initializers/` directory for API initializer loading. [web:78][web:71]
+- Keep settings in `settings.yml` because Discourse theme settings are defined repository-side rather than through the admin code editor.
+- Keep JavaScript in the `javascripts/discourse/api-initializers/` directory for API initializer loading.
 - Keep styles in `common/common.scss`.
 
 ## Credits
 
-Inspired by the Discourse Topic Cards concept, adapted into a hover-preview component for use inside posts, replies, topic lists, and suggested-topic links. The original Topic Cards component is a separate Discourse theme component focused on restyling topic lists as cards. [web:370][web:40]
+Inspired by the Discourse Topic Cards concept, adapted into a hover-preview component for use inside posts, replies, topic lists, and suggested-topic links. The original Topic Cards component is a separate Discourse theme component focused on restyling topic lists as cards.
