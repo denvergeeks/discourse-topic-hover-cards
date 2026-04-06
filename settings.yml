@@ -81,3 +81,21 @@ show_likes:
 show_activity:
   type: bool
   default: true
+
+# --- Enabled on ---
+
+enable_on_topics:
+  type: bool
+  default: true
+
+enable_on_replies:
+  type: bool
+  default: true
+
+enable_on_topic_lists:
+  type: bool
+  default: true
+
+enable_on_suggested_topic_links:
+  type: bool
+  default: true
