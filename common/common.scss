@@ -57,9 +57,9 @@
 }
 
 .topic-hover-card {
-  width: var(--thc-width, 420px);
+  width: var(--thc-width, 24rem);
   max-width: calc(100vw - 32px);
-  max-height: var(--thc-max-h, 480px);
+  max-height: var(--thc-max-h, 18rem);
   display: flex;
   flex-direction: column;
   background: var(--secondary);
@@ -80,13 +80,6 @@
   &--thumb-right {
     flex-direction: row;
 
-    &--thumb-left,
-    &--thumb-right {
-      .topic-hover-card__body {
-        padding: 0.7rem 0.85rem;
-      }
-    }
-
     .topic-hover-card__thumbnail {
       flex: 0 0 7.5rem;
       width: 7.5rem;
@@ -97,6 +90,7 @@
     .topic-hover-card__body {
       flex: 1 1 auto;
       min-width: 0;
+      padding: 0.7rem 0.85rem;
     }
   }
 
@@ -151,25 +145,38 @@
     color: var(--primary-medium);
     line-height: 1.45;
     display: -webkit-box;
-    -webkit-line-clamp: 3;
+    -webkit-line-clamp: var(--thc-excerpt-lines, 3);
     -webkit-box-orient: vertical;
     overflow: hidden;
     text-overflow: ellipsis;
     margin-bottom: 0.6rem;
-    min-height: 2.5em;
+  }
+
+  &__metadata {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem 0.9rem;
+    flex-wrap: wrap;
+    border-top: 1px solid var(--primary-low);
+    padding-top: 0.5rem;
+    margin-top: 0.25rem;
+    color: var(--primary-medium);
   }
 
   &__op {
-    display: flex;
+    display: inline-flex;
     align-items: center;
     gap: 0.4rem;
     color: var(--primary-medium);
-    margin-bottom: 0.5rem;
     font-size: var(--font-down-1-rem);
+    flex: 0 1 auto;
+    min-width: 0;
 
     img {
       border-radius: 50%;
       flex-shrink: 0;
+      width: 24px;
+      height: 24px;
     }
 
     .username {
@@ -180,25 +187,11 @@
     }
   }
 
-  &__metadata {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    border-top: 1px solid var(--primary-low);
-    padding-top: 0.5rem;
-    margin-top: 0.25rem;
-    color: var(--primary-medium);
-    gap: 0.75rem;
-    flex-wrap: wrap;
-  }
-
   &__publish-date {
     font-size: var(--font-down-2-rem);
     color: var(--primary-medium);
-    flex: 1 1 auto;
+    flex: 0 1 auto;
     min-width: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
     white-space: nowrap;
   }
 
@@ -206,7 +199,7 @@
     display: flex;
     align-items: center;
     gap: 0.75rem;
-    flex: 0 1 auto;
+    flex: 1 1 auto;
     flex-wrap: wrap;
     justify-content: flex-end;
     margin-left: auto;
