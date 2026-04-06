@@ -1,11 +1,8 @@
 en:
   theme_metadata:
-    description: "Shows rich hover preview cards for internal topic links across posts, replies, topic lists, category homepage list layouts, Doc Categories views, Kanban boards, and suggested topics."
+    description: "Shows rich hover preview cards for internal topic links across topics, replies, topic lists, the categories homepage, Doc Categories, Kanban boards, and suggested topics."
 
   settings:
-    section_general: "General"
-    section_general_description: "Section label only."
-
     card_width: "Card width"
     card_width_description: "Any valid CSS width value, such as 32rem, 420px, 40vw, or clamp(20rem, 40vw, 36rem)."
 
@@ -19,40 +16,34 @@ en:
     enable_on_mobile_description: "Enable tap-to-preview behavior on touch devices."
 
     user_preference_field_name: "User preference field name"
-    user_preference_field_name_description: "The custom user field key used to disable hover cards per user."
+    user_preference_field_name_description: "The custom user field key used to disable hover cards per user. Supports direct keys (e.g. disable_topic_hover_cards), numeric IDs (e.g. 1), and user_field_X keys (e.g. user_field_1)."
 
     debug_mode: "Debug mode"
-    debug_mode_description: "Log hover-card field detection details to the browser console for staff debugging."
+    debug_mode_description: "Log hover-card detection and user-field resolution details to the browser console for staff debugging."
 
     resolve_user_field_id_for_admins: "Resolve user field ID for admins"
-    resolve_user_field_id_for_admins_description: "When enabled, admins can fetch /admin/config/user-fields.json to map the configured user field name to its numeric user_field_ID key."
-
-    section_link_locations: "Link locations"
-    section_link_locations_description: "Section label only."
+    resolve_user_field_id_for_admins_description: "When enabled, admins can configure the preference field by name or user_field_X; the component will use /admin/config/user-fields.json to resolve the numeric user-field ID."
 
     enable_on_topics: "Enable on topics"
-    enable_on_topics_description: "Show hover cards for internal topic links inside the original post."
+    enable_on_topics_description: "Show hover cards for topic links inside the original post."
 
     enable_on_replies: "Enable on replies"
-    enable_on_replies_description: "Show hover cards for internal topic links inside replies."
+    enable_on_replies_description: "Show hover cards for topic links inside replies."
 
     enable_on_topic_lists: "Enable on topic lists"
-    enable_on_topic_lists_description: "Show hover cards for internal topic links shown in standard topic list views."
+    enable_on_topic_lists_description: "Show hover cards for topic links in standard topic lists (Latest, Top, category topic lists, tags, etc.)."
 
     enable_on_category_homepage_topic_lists: "Enable on category homepage topic lists"
-    enable_on_category_homepage_topic_lists_description: "Show hover cards for internal topic links shown in topic-list areas on category homepage layouts, such as Categories and Latest Topics or Categories with Featured Topics."
+    enable_on_category_homepage_topic_lists_description: "Show hover cards for topic links in the latest/featured topic lists on the categories homepage (including Categories + Latest layouts rendered at / or /categories)."
 
     enable_on_doc_categories: "Enable on Doc Categories"
-    enable_on_doc_categories_description: "Show hover cards for internal topic links inside Discourse Doc Categories views and navigation areas."
+    enable_on_doc_categories_description: "Show hover cards for topic links in Doc Categories views (when available)."
 
     enable_on_kanban_boards: "Enable on Kanban boards"
-    enable_on_kanban_boards_description: "Show hover cards for internal topic links inside Discourse Kanban board cards and board views."
+    enable_on_kanban_boards_description: "Show hover cards for topic links rendered in Kanban-style board layouts (when available)."
 
     enable_on_suggested_topic_links: "Enable on suggested topic links"
     enable_on_suggested_topic_links_description: "Show hover cards for links in the suggested topics section."
-
-    section_content: "Content"
-    section_content_description: "Section label only."
 
     show_thumbnail: "Show thumbnail"
     show_thumbnail_description: "Display the topic thumbnail image on desktop."
@@ -64,10 +55,10 @@ en:
     thumbnail_placement_description: "Choose where the thumbnail appears on desktop. On mobile, the thumbnail is always shown at the top."
 
     density: "Density"
-    density_description: "Controls desktop hover card density. Matches the relative options used by Density Toggle: default, cozy, and compact."
+    density_description: "Controls desktop hover card density. Options: default, cozy, compact."
 
     density_mobile: "Density on mobile"
-    density_mobile_description: "Controls mobile hover card density. Matches the relative options used by Density Toggle: default, cozy, and compact."
+    density_mobile_description: "Controls mobile hover card density. Options: default, cozy, compact."
 
     image_size_percent: "Image size percent"
     image_size_percent_description: "For desktop left and right thumbnail layouts, sets the image width as a percentage of the hover card width."
