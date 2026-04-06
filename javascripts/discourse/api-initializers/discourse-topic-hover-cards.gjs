@@ -116,23 +116,61 @@ function mobileInt(name, mobileName, fallback, isMobile) {
 function buildCardHTML(topic, site, isMobile = false) {
   const topicUrl = `${window.location.origin}/t/${topic.slug || topic.id}/${topic.id}`;
 
-  const showThumbnail = mobileBool("show_thumbnail", "show_thumbnail_mobile", isMobile);
-  const showCategory = mobileBool("show_category", "show_category_mobile", isMobile);
+  const showThumbnail = mobileBool(
+    "show_thumbnail",
+    "show_thumbnail_mobile",
+    isMobile
+  );
+  const showCategory = mobileBool(
+    "show_category",
+    "show_category_mobile",
+    isMobile
+  );
   const showTags = mobileBool("show_tags", "show_tags_mobile", isMobile);
   const showTitle = mobileBool("show_title", "show_title_mobile", isMobile);
-  const showExcerpt = mobileBool("show_excerpt", "show_excerpt_mobile", isMobile);
+  const showExcerpt = mobileBool(
+    "show_excerpt",
+    "show_excerpt_mobile",
+    isMobile
+  );
   const showOp = mobileBool("show_op", "show_op_mobile", isMobile);
-  const showPublishDate = mobileBool("show_publish_date", "show_publish_date_mobile", isMobile);
+  const showPublishDate = mobileBool(
+    "show_publish_date",
+    "show_publish_date_mobile",
+    isMobile
+  );
   const showViews = mobileBool("show_views", "show_views_mobile", isMobile);
-  const showReplyCount = mobileBool("show_reply_count", "show_reply_count_mobile", isMobile);
+  const showReplyCount = mobileBool(
+    "show_reply_count",
+    "show_reply_count_mobile",
+    isMobile
+  );
   const showLikes = mobileBool("show_likes", "show_likes_mobile", isMobile);
-  const showActivity = mobileBool("show_activity", "show_activity_mobile", isMobile);
+  const showActivity = mobileBool(
+    "show_activity",
+    "show_activity_mobile",
+    isMobile
+  );
 
-  const excerptLength = mobileInt("excerpt_length", "excerpt_length_mobile", 3, isMobile);
-  const imageSizePercent = mobileInt("image_size_percent", "image_size_percent_mobile", 30, isMobile);
+  const excerptLength = mobileInt(
+    "excerpt_length",
+    "excerpt_length_mobile",
+    3,
+    isMobile
+  );
+  const imageSizePercent = mobileInt(
+    "image_size_percent",
+    "image_size_percent_mobile",
+    30,
+    isMobile
+  );
 
   const configuredPlacement = settings.thumbnail_placement || "left";
   const placement = isMobile ? "top" : configuredPlacement;
+
+  const mobileImageHeight = isMobile
+    ? Math.max(96, Math.round((imageSizePercent / 100) * 220))
+    : null;
 
   const mobileCloseButton = isMobile
     ? `<button class="topic-hover-card__close" type="button" data-thc-close aria-label="Close preview">
@@ -177,7 +215,9 @@ function buildCardHTML(topic, site, isMobile = false) {
 
   let tagsHTML = "";
   if (showTags && Array.isArray(topic.tags) && topic.tags.length) {
-    const normalizedTags = topic.tags.map((tag) => normalizeTag(tag)).filter(Boolean);
+    const normalizedTags = topic.tags
+      .map((tag) => normalizeTag(tag))
+      .filter(Boolean);
 
     if (normalizedTags.length) {
       tagsHTML = `
@@ -191,6 +231,7 @@ function buildCardHTML(topic, site, isMobile = false) {
   }
 
   const title = topic.fancy_title ?? topic.title ?? "(no title)";
+
   const titleHTML = showTitle
     ? `<div class="topic-hover-card__title">${title}</div>`
     : "";
@@ -243,16 +284,24 @@ function buildCardHTML(topic, site, isMobile = false) {
   const statItems = [];
 
   if (showViews) {
-    statItems.push(`<span class="topic-hover-card__stat">${dIconSVG("eye")} ${fmtNum(topic.views)}</span>`);
+    statItems.push(
+      `<span class="topic-hover-card__stat">${dIconSVG("eye")} ${fmtNum(topic.views)}</span>`
+    );
   }
 
   if (showReplyCount) {
-    statItems.push(`<span class="topic-hover-card__stat">${dIconSVG("comment")} ${fmtNum(topic.reply_count ?? topic.posts_count - 1)}</span>`);
+    statItems.push(
+      `<span class="topic-hover-card__stat">${dIconSVG("comment")} ${fmtNum(
+        topic.reply_count ?? topic.posts_count - 1
+      )}</span>`
+    );
   }
 
   if (showLikes) {
     const likes = topic.like_count ?? topic.topic_post_like_count ?? 0;
-    statItems.push(`<span class="topic-hover-card__stat">${dIconSVG("heart")} ${fmtNum(likes)}</span>`);
+    statItems.push(
+      `<span class="topic-hover-card__stat">${dIconSVG("heart")} ${fmtNum(likes)}</span>`
+    );
   }
 
   if (showActivity && topic.last_posted_at) {
@@ -262,14 +311,19 @@ function buildCardHTML(topic, site, isMobile = false) {
       day: "numeric",
       year: "numeric",
     });
-    statItems.push(`<span class="topic-hover-card__stat">${dIconSVG("clock")} ${fmt}</span>`);
+    statItems.push(
+      `<span class="topic-hover-card__stat">${dIconSVG("clock")} ${fmt}</span>`
+    );
   }
 
   const statsHTML = statItems.length
     ? `<div class="topic-hover-card__stats">${statItems.join("")}</div>`
     : "";
 
-  const metadataItems = [opHTML, publishDate, statsHTML].filter(Boolean).join("");
+  const metadataItems = [opHTML, publishDate, statsHTML]
+    .filter(Boolean)
+    .join("");
+
   const metadata = metadataItems
     ? `<div class="topic-hover-card__metadata">${metadataItems}</div>`
     : "";
@@ -292,12 +346,9 @@ function buildCardHTML(topic, site, isMobile = false) {
       ${mobileActions}
   `;
 
-  const wrapperStyle = `
-    style="
-      --thc-image-size-percent:${imageSizePercent};
-      --thc-mobile-image-height:${Math.max(96, Math.round((imageSizePercent / 100) * 220))}px;
-    "
-  `;
+  const wrapperStyle = isMobile
+    ? `style="--thc-mobile-image-height:${mobileImageHeight}px;"`
+    : `style="--thc-image-size-percent:${imageSizePercent};"`;
 
   switch (placement) {
     case "left":
@@ -436,7 +487,10 @@ export default apiInitializer((api) => {
     ensureTooltip();
     cancel(hideTimer);
 
-    if (currentTopicId === topicId && tooltip.classList.contains("is-visible")) {
+    if (
+      currentTopicId === topicId &&
+      tooltip.classList.contains("is-visible")
+    ) {
       positionTooltip(anchorRect);
       return;
     }
