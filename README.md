@@ -1,195 +1,221 @@
 # Discourse Topic Hover Cards
 
-A Discourse theme component that shows rich preview cards for internal topic links across topics, replies, topic lists, and suggested topics.
+A Discourse theme component that shows rich hover preview cards for **internal topic links** across topics, replies, topic lists, the categories homepage, Doc Categories, Kanban boards, and suggested topics.
+
+When users hover a topic link (or tap on mobile), a card appears with the topic thumbnail, title, excerpt, category, tags, and key stats.
+
+---
 
 ## Features
 
-- Rich hover preview cards for internal topic links
-- Desktop hover support
-- Optional mobile tap-to-preview bottom sheet
-- Configurable desktop width and max height
-- Configurable mobile width and thumbnail height
-- Configurable desktop thumbnail placement
-- Separate desktop/mobile density settings
-- Separate desktop/mobile content visibility settings
-- Per-user disable toggle via custom user field
-- Topic JSON fetch caching for repeated previews
+- Hover cards for internal topic links in:
+  - Topic body (original post)
+  - Replies
+  - Standard topic lists (`/latest`, `/top`, `/tags`, category topic lists, etc.)
+  - Categories homepage topic lists (Categories + Latest, Categories-only, and related layouts)
+  - Doc Categories views
+  - Kanban-style board views
+  - Suggested topics
+- Responsive layout:
+  - Desktop card with configurable density and thumbnail placement
+  - Mobile bottom-sheet preview with tap-to-open
+- Configurable content:
+  - Thumbnail image
+  - Category badge
+  - Tags
+  - Title
+  - Excerpt (cleaned of images/lightboxes)
+  - Original poster
+  - Publish date
+  - Views, replies, likes, last activity
+- Per-user opt-out using a custom user field
+- Admin-only debug mode for safe troubleshooting
+
+---
 
 ## Installation
 
-In Discourse Admin:
+1. Go to **Admin → Customize → Themes → Components**.
+2. Click **Install** and add the git repository URL for this component.
+3. Once installed, add the component to the themes you want it active on.
+4. (Optional) Make the theme user-selectable while testing, so only you see changes. [web:580]
 
-1. Go to **Admin → Appearance → Themes & Components**
-2. Open the **Components** tab
-3. Click **Install**
-4. Choose **From a git repository**
-5. Enter the repository URL
-6. Install the component
-7. Add the component to your active theme via **Include component on these themes**
+For theme/component structure and git-based installs, see **Structure of themes and theme components** in the Discourse developer docs. [web:409]
 
-Discourse supports installing theme components directly from git repositories. After installation, add the component to one or more active themes.
+---
 
 ## Settings
 
-### Layout and behavior
+All settings are under **Admin → Customize → Themes → [this component] → Settings**. [web:22]
 
-- `card_width`  
-  Any valid CSS width value for desktop cards, such as `32rem`, `420px`, `40vw`, or `clamp(20rem, 40vw, 36rem)`.
+### Layout & timing
 
-- `card_max_height`  
-  Any valid CSS max-height value for desktop cards, such as `10rem`, `480px`, `50vh`, or `min(60vh, 32rem)`.
+- **card_width**  
+  Any CSS width value (for desktop), e.g. `32rem`, `420px`, `40vw`, `clamp(20rem, 40vw, 36rem)`.
 
-- `card_delay_ms`  
-  Delay in milliseconds before the hover card appears.
+- **card_max_height**  
+  Any CSS max-height value, e.g. `10rem`, `480px`, `50vh`, `min(60vh, 32rem)`.
 
-- `enable_on_mobile`  
-  Enables tap-to-preview behavior on touch devices.
+- **card_delay_ms**  
+  Delay before showing the hover card, in milliseconds (default: `300`).
 
-### Placement and sizing
+- **enable_on_mobile**  
+  When enabled, tap on a supported internal topic link shows a mobile preview sheet.
 
-- `thumbnail_placement`  
-  Desktop thumbnail placement: `top`, `left`, `right`, or `bottom`.
+- **mobile_width_percent**  
+  Width of the mobile bottom-sheet preview as a percentage of viewport width (default: `100`).
 
-- `image_size_percent`  
-  For desktop left/right layouts, controls the thumbnail width as a percentage of the card width.
-
-- `mobile_width_percent`  
-  Controls the mobile preview width as a percentage of the viewport width.
-
-- `mobile_thumbnail_height`  
-  Controls the mobile thumbnail height in pixels.
+- **mobile_thumbnail_height**  
+  Thumbnail height in pixels for the mobile preview.
 
 ### Density
 
-This component includes separate desktop and mobile density settings that match the relative options used by the Discourse Density Toggle component:
+- **density**  
+  Desktop density: `default`, `cozy`, or `compact`.
 
-- `default`
-- `cozy`
-- `compact`
+- **density_mobile**  
+  Mobile density: `default`, `cozy`, or `compact`.
 
-Settings:
+These are parallel to the Discourse “Density” patterns and simply adjust padding and line heights.
 
-- `density`  
-  Controls desktop hover card density.
+### Thumbnail & placement
 
-- `density_mobile`  
-  Controls mobile hover card density.
+- **show_thumbnail** / **show_thumbnail_mobile**  
+  Show/hide the topic image (if any) on desktop and mobile.
 
-Density settings adjust the compactness of the hover card content, including spacing, padding, gaps, and text rhythm.
+- **thumbnail_placement**  
+  How the thumbnail is positioned on desktop:
+  - `top`
+  - `left`
+  - `right`
+  - `bottom`  
+  On mobile, the thumbnail is always rendered at the top of the card.
 
-Density settings do **not** control desktop thumbnail size.
+- **image_size_percent**  
+  For desktop `left` and `right` layouts, controls thumbnail width as a percentage of the hover card width.
 
-Desktop thumbnail size and placement are controlled by these layout settings instead:
+### Fields per viewport
 
-- `thumbnail_placement`
-- `image_size_percent`
+For each block below, you have both desktop and mobile toggles:
 
-Mobile thumbnail size is controlled separately by:
+- **show_category** / **show_category_mobile**
+- **show_tags** / **show_tags_mobile**
+- **show_title** / **show_title_mobile**
+- **show_excerpt** / **show_excerpt_mobile**
+- **excerpt_length** / **excerpt_length_mobile**  
+  Number of lines for the excerpt (CSS line-clamp).
 
-- `mobile_thumbnail_height`
-- Note: Density affects content rhythm, not thumbnail dimensions. (Density settings do not change thumbnail dimensions. Desktop thumbnail size is controlled by `thumbnail_placement` and `image_size_percent`, while mobile thumbnail height is controlled by `mobile_thumbnail_height`.)
+- **show_op** / **show_op_mobile**  
+  Shows original poster avatar + username.
 
-This separation is intentional:
+- **show_publish_date** / **show_publish_date_mobile**
+- **show_views** / **show_views_mobile**
+- **show_reply_count** / **show_reply_count_mobile**
+- **show_likes** / **show_likes_mobile**
+- **show_activity** / **show_activity_mobile**
 
-- layout settings control image size and placement
-- density settings control spacing and content compactness
-- visibility settings control which content elements appear
+### Where hover cards appear
 
-### Content visibility
+- **enable_on_topics**  
+  Topic links in the original post.
 
-Desktop and mobile each have separate settings for:
+- **enable_on_replies**  
+  Topic links in replies.
 
-- thumbnail
-- category
-- tags
-- title
-- excerpt
-- original poster
-- publish date
-- views
-- reply count
-- likes
-- last activity
+- **enable_on_topic_lists**  
+  Topic links in standard topic lists, e.g. `/latest`, `/top`, category topic lists.
 
-## Per-user disable toggle
+- **enable_on_category_homepage_topic_lists**  
+  Topic links in the “latest topics” or equivalent lists on the **categories homepage**:
+  - Categories + Latest Topics
+  - Categories-only
+  - Related variants rendered at `/` or `/categories`, depending on how your homepage is configured. [web:807][web:922]
 
-This component supports a per-user preference so an individual user can disable hover cards for their own account.
+- **enable_on_doc_categories**  
+  Topic links in **Doc Categories** views (when applicable).
 
-### Theme setting
+- **enable_on_kanban_boards**  
+  Topic links rendered in Kanban-style board layouts (when applicable).
 
-- `user_preference_field_name`  
-  The custom user field key used to disable hover cards per user.
+- **enable_on_suggested_topic_links**  
+  Links in the “Suggested topics” section.
 
-Default:
+---
 
-```text
-disable_topic_hover_cards
-```
+## Per-user opt-out
 
-### How it works
+You can let individual users disable hover cards using a **custom user field**. This uses the standard theme-settings mechanism and current-user data access described in the developer guides. [web:22][web:876]
 
-When the component loads, it checks the current user for the configured custom user field. If the field contains a truthy value, the hover-card behavior does not initialize for that user.
+- **user_preference_field_name**  
+  The key used to detect opt-out on the current user. This can be:
+  - a direct custom field key, e.g. `disable_topic_hover_cards`
+  - a numeric ID, e.g. `1`
+  - a `user_field_X` key, e.g. `user_field_1`
 
-Accepted truthy values include:
+### How matching works
 
-- `true`
-- `1`
-- `"1"`
-- `"true"`
-- `"yes"`
-- `"on"`
-- `"checked"`
+1. The component first checks the current user’s `custom_fields` and `user_fields` for:
+   - the configured `user_preference_field_name`
+   - the same value converted between `1` and `user_field_1` when appropriate
+2. If no match is found and the current user is staff (admin/moderator) and
+   **resolve_user_field_id_for_admins** is enabled, the component calls:
+   - `/admin/config/user-fields.json`  
+     to map the configured value (field name or `user_field_X`) to its numeric ID.
+3. With the numeric ID, it checks:
+   - `user_fields[id]`
+   - `user_fields['user_field_' + id]`
+   - `custom_fields[id]`
+   - `custom_fields['user_field_' + id]`
 
-## Admin setup for the per-user toggle
+Any truthy value in those positions (e.g. `1`, `true`, `yes`, `on`, `checked`) disables hover cards for that user.
 
-Create a custom user field in Discourse Admin.
+### Settings for this behavior
 
-Suggested setup:
+- **resolve_user_field_id_for_admins**  
+  When enabled (recommended), admins can configure the field either by name or `user_field_X`, and the component will resolve and match the numeric ID automatically.
 
-- **Label:** `Disable topic hover cards`
-- **Description:** `Turn off topic hover cards for this account`
-- **Type:** checkbox / confirmation style field
-- **Editable by user:** enabled
-- **Shown in preferences or editable profile UI:** enabled
+- **debug_mode**  
+  When enabled, logs detailed detection information to the browser console for staff, including:
+  - which keys were checked
+  - where a match was found (current user vs full user record)
+  - the resolved numeric user-field ID, if any
 
-Then set the component setting:
+---
 
-```text
-user_preference_field_name = disable_topic_hover_cards
-```
+## Debugging
 
-The field key on your site must match the value configured in the theme setting. Set this to the custom user field key you want to use, such as disable_topic_hover_cards.
-Note: On some sites, Discourse may expose the field as user_field_X based on the site-specific field ID, and this component will try to resolve that automatically for admins.
+If hover cards don’t appear where you expect, use the built-in debug mode:
 
-## Mobile behavior
+1. Enable **debug_mode** in this component’s settings.
+2. Open the browser developer console.
+3. Hover or tap a relevant topic link.
 
-When mobile support is enabled:
+You will see messages similar to:
 
-- tapping a supported internal topic link opens a bottom-sheet preview
-- the bottom sheet width is controlled by `mobile_width_percent`
-- the image height is controlled by `mobile_thumbnail_height`
-- the mobile layout density is controlled by `density_mobile`
+- `Hover cards initialized` – confirms initialization and the enabled locations.
+- `Resolved admin user-field mapping` – confirms mapping of your configured user field name / key to a numeric ID (for staff).
+- `No disable field match found anywhere` – confirms hover cards are not being suppressed for the current user.
 
-## Supported link locations
+To debug **where** the card should appear, check that:
 
-Hover cards can be enabled independently for:
+- your target link is an internal topic link (`/t/...`) that `topicIdFromHref()` can parse
+- the relevant location flag is enabled:
+  - `enable_on_topics`
+  - `enable_on_replies`
+  - `enable_on_topic_lists`
+  - `enable_on_category_homepage_topic_lists`
+  - `enable_on_doc_categories`
+  - `enable_on_kanban_boards`
+  - `enable_on_suggested_topic_links`
 
-- links in topic bodies
-- links in replies
-- links in topic lists
-- links in suggested topics
+The component’s runtime logic uses the modern JS API initializer pattern described in the **Theme Developer Tutorial: Using the JS API**, and the recommended `service:site` / `service:store` access patterns. [web:827][web:873]
 
-## Notes
+---
 
-- Only internal topic links are targeted.
-- External links are ignored.
-- The per-user custom field disables the component for that specific user only.
-- Global mobile disable still overrides user-level preference for mobile behavior because the component does not initialize mobile previews when mobile is globally off.
+## Compatibility & notes
 
-## Compatibility
+- **Discourse:** Built and tested against Discourse `v2026.4.0-latest` and Ember `v6.10.1`.  
+- **Themes:** Intended as a theme component; add it to any theme where you want hover cards.
+- **Other components:** If you also customize homepage content (e.g. custom Categories + Latest implementations, Doc Categories, or Kanban components), ensure their CSS does not hide `.topic-hover-card-tooltip` or block pointer events on links.
 
-Designed for modern Discourse versions that support theme components, theme settings, theme translations, and JS API initializers.
-
-## Credits
-
-Inspired by card-based topic previews and adapted for hover and mobile preview behavior inside Discourse.
+For more on theme/component structure and git-based workflows, see: [Structure of themes and theme components](https://meta.discourse.org/t/structure-of-themes-and-theme-components/60848) and the theme developer tutorials. [web:409][web:645]
