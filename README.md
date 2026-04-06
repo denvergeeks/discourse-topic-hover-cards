@@ -10,6 +10,7 @@ A Discourse theme component that shows rich preview cards for internal topic lin
 - Configurable desktop width and max height
 - Configurable mobile width and thumbnail height
 - Configurable desktop thumbnail placement
+- Separate desktop/mobile density settings
 - Separate desktop/mobile content visibility settings
 - Per-user disable toggle via custom user field
 - Topic JSON fetch caching for repeated previews
@@ -57,6 +58,24 @@ Discourse supports installing theme components directly from git repositories. A
 
 - `mobile_thumbnail_height`  
   Controls the mobile thumbnail height in pixels.
+
+### Density
+
+This component includes separate desktop and mobile density settings that match the relative options used by the Discourse Density Toggle component:
+
+- `default`
+- `cozy`
+- `compact`
+
+Settings:
+
+- `density`  
+  Controls desktop hover card density.
+
+- `density_mobile`  
+  Controls mobile hover card density.
+
+These settings adjust spacing, text rhythm, gaps, and overall compactness of the hover card while preserving the configured mobile thumbnail height.
 
 ### Content visibility
 
@@ -130,6 +149,7 @@ When mobile support is enabled:
 - tapping a supported internal topic link opens a bottom-sheet preview
 - the bottom sheet width is controlled by `mobile_width_percent`
 - the image height is controlled by `mobile_thumbnail_height`
+- the mobile layout density is controlled by `density_mobile`
 
 ## Supported link locations
 
