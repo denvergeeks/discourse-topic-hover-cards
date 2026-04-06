@@ -77,11 +77,10 @@
     flex-direction: row;
 
     .topic-hover-card__thumbnail {
-      order: 0 !important;
-      width: 100% !important;
-      height: var(--thc-mobile-image-height, 160px) !important;
-      min-height: 0 !important;
-      flex: 0 0 var(--thc-mobile-image-height, 160px) !important;
+      flex: 0 0 calc(var(--thc-image-size-percent, 30) * 1%);
+      width: calc(var(--thc-image-size-percent, 30) * 1%);
+      height: auto;
+      min-height: 100%;
     }
 
     .topic-hover-card__body {
@@ -136,8 +135,17 @@
     font-weight: 600;
     line-height: 1.2;
     color: var(--primary);
-    background: color-mix(in srgb, var(--thc-category-color, var(--primary-low)) 18%, transparent);
-    border: 1px solid color-mix(in srgb, var(--thc-category-color, var(--primary-low)) 45%, var(--primary-low));
+    background: color-mix(
+      in srgb,
+      var(--thc-category-color, var(--primary-low)) 18%,
+      transparent
+    );
+    border: 1px solid
+      color-mix(
+        in srgb,
+        var(--thc-category-color, var(--primary-low)) 45%,
+        var(--primary-low)
+      );
   }
 
   &__tags {
@@ -339,7 +347,7 @@
     }
   }
 
-  .topic-hover-card {
+  .topic-hover-card-tooltip .topic-hover-card {
     width: 100% !important;
     max-width: 100% !important;
     max-height: 55vh;
@@ -357,60 +365,67 @@
       margin: 8px auto 4px;
       flex: 0 0 auto;
     }
+  }
 
-    .topic-hover-card__thumbnail {
-      order: 0 !important;
-      width: 100% !important;
-      height: 160px !important;
-      min-height: 0 !important;
-      flex: 0 0 160px !important;
+  .topic-hover-card-tooltip .topic-hover-card .topic-hover-card__thumbnail {
+    order: 0 !important;
+    width: 100% !important;
+    height: var(--thc-mobile-image-height, 160px) !important;
+    min-height: 0 !important;
+    flex: 0 0 var(--thc-mobile-image-height, 160px) !important;
+  }
+
+  .topic-hover-card-tooltip .topic-hover-card .topic-hover-card__body {
+    order: 1 !important;
+    flex: 1 1 auto;
+    min-height: 0;
+    min-width: 0;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 0.85rem 0.9rem 0.9rem;
+  }
+
+  .topic-hover-card-tooltip .topic-hover-card .topic-hover-card__close {
+    position: absolute;
+    top: 0.65rem;
+    right: 0.65rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 999px;
+    background: rgba(170, 35, 35, 0.12);
+    color: #b02121;
+    border: 1px solid rgba(176, 33, 33, 0.18);
+    z-index: 2;
+
+    .d-icon {
+      width: 0.95rem;
+      height: 0.95rem;
     }
+  }
 
-    .topic-hover-card__body {
-      order: 1 !important;
-      flex: 1 1 auto;
-      min-height: 0;
-      min-width: 0;
-      overflow-y: auto;
-      -webkit-overflow-scrolling: touch;
-      padding: 0.85rem 0.9rem 0.9rem;
-    }
+  .topic-hover-card-tooltip .topic-hover-card .topic-hover-card__mobile-actions {
+    display: block;
+    margin-top: 0.75rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--primary-low);
+  }
 
-    .topic-hover-card__close {
-      position: absolute;
-      top: 0.65rem;
-      right: 0.65rem;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 2rem;
-      height: 2rem;
-      border-radius: 999px;
-      background: rgba(170, 35, 35, 0.12);
-      color: #b02121;
-      border: 1px solid rgba(176, 33, 33, 0.18);
-      z-index: 2;
+  .topic-hover-card-tooltip .topic-hover-card .topic-hover-card__open-topic {
+    display: inline-flex;
+    width: 100%;
+    justify-content: center;
+    align-items: center;
+    min-height: 2.75rem;
+  }
 
-      .d-icon {
-        width: 0.95rem;
-        height: 0.95rem;
-      }
-    }
-
-    .topic-hover-card__mobile-actions {
-      display: block;
-      margin-top: 0.75rem;
-      padding-top: 0.75rem;
-      border-top: 1px solid var(--primary-low);
-    }
-
-    .topic-hover-card__open-topic {
-      display: inline-flex;
-      width: 100%;
-      justify-content: center;
-      align-items: center;
-      min-height: 2.75rem;
-    }
+  .topic-hover-card-tooltip
+    .topic-hover-card
+    .topic-hover-card__body
+    a:not(.topic-hover-card__open-topic) {
+    pointer-events: none;
   }
 }
 
