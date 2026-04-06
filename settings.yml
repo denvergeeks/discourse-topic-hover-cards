@@ -53,11 +53,17 @@ image_size_percent:
   min: 15
   max: 60
 
+mobile_width_percent:
+  type: integer
+  default: 100
+  min: 70
+  max: 100
+
 mobile_thumbnail_height:
   type: integer
   default: 160
   min: 80
-  max: 260
+  max: 320
 
 show_category:
   type: bool
@@ -99,7 +105,7 @@ excerpt_length:
 
 excerpt_length_mobile:
   type: integer
-  default: 3
+  default: 2
   min: 1
   max: 12
 
@@ -149,4 +155,4 @@ show_activity:
 
 show_activity_mobile:
   type: bool
-  default: true
+  default: false
