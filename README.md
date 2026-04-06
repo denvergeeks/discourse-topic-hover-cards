@@ -40,13 +40,13 @@ This component was inspired by the idea behind topic cards, but instead of chang
 
 Install this as a remote theme component in Discourse:
 
-1. Go to **Admin → Appearance → Themes & Components**. [web:366]
-2. Open the **Components** tab. [web:366]
-3. Click **Install**. [web:366]
-4. Choose **From a git repository**. [web:366]
+1. Go to **Admin → Appearance → Themes & Components**.
+2. Open the **Components** tab.
+3. Click **Install**.
+4. Choose **From a git repository**.
 5. Paste this repository URL.
 6. Install the component.
-7. Add the component to one or more active themes using the component/theme inclusion settings. [web:366]
+7. Add the component to one or more active themes using the component/theme inclusion settings.
 
 ## Settings
 
