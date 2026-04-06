@@ -363,6 +363,39 @@ async function hoverCardsDisabledForUser(api, currentUser) {
   return false;
 }
 
+function inDocCategoriesView(link) {
+  return (
+    !!link.closest(".doc-categories") ||
+    !!link.closest(".doc-categories-container") ||
+    !!link.closest("[class*='doc-categories']") ||
+    document.body.classList.contains("doc-categories")
+  );
+}
+
+function inKanbanView(link) {
+  return (
+    !!link.closest(".kanban-board") ||
+    !!link.closest(".kanban-column") ||
+    !!link.closest(".kanban-card") ||
+    !!link.closest("[class*='kanban']") ||
+    document.body.classList.contains("kanban")
+  );
+}
+
+function inCategoryHomepageTopicList(link) {
+  const inTopicList = !!link.closest(".topic-list");
+  if (!inTopicList) return false;
+
+  return (
+    document.body.classList.contains("navigation-categories") ||
+    document.body.classList.contains("categories-list") ||
+    document.body.classList.contains("category-list") ||
+    !!document.querySelector(".categories-and-latest") ||
+    !!document.querySelector(".categories-only") ||
+    !!document.querySelector(".categories-with-featured-topics")
+  );
+}
+
 function buildCardHTML(topic, site, isMobile = false) {
   const topicUrl = `${window.location.origin}/t/${topic.slug || topic.id}/${topic.id}`;
 
@@ -823,6 +856,18 @@ export default apiInitializer((api) => {
       const inSuggested = !!link.closest(".suggested-topics");
       if (inSuggested && settings.enable_on_suggested_topic_links) return true;
 
+      if (inDocCategoriesView(link)) {
+        return settings.enable_on_doc_categories;
+      }
+
+      if (inKanbanView(link)) {
+        return settings.enable_on_kanban_boards;
+      }
+
+      if (inCategoryHomepageTopicList(link)) {
+        return settings.enable_on_category_homepage_topic_lists;
+      }
+
       const inTopicList = !!link.closest(".topic-list");
       if (inTopicList && settings.enable_on_topic_lists) return true;
 
@@ -936,6 +981,16 @@ export default apiInitializer((api) => {
       mobileEnabled: MOBILE_ENABLED,
       configuredField: USER_PREFERENCE_FIELD_NAME,
       currentViewportIsMobile: isMobileView(),
+      locations: {
+        topics: settings.enable_on_topics,
+        replies: settings.enable_on_replies,
+        topicLists: settings.enable_on_topic_lists,
+        categoryHomepageTopicLists:
+          settings.enable_on_category_homepage_topic_lists,
+        docCategories: settings.enable_on_doc_categories,
+        kanbanBoards: settings.enable_on_kanban_boards,
+        suggested: settings.enable_on_suggested_topic_links,
+      },
     });
   })();
 });
