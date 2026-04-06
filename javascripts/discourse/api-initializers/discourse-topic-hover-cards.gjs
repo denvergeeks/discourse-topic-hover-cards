@@ -2,16 +2,6 @@ import { later, cancel } from "@ember/runloop";
 import { apiInitializer } from "discourse/lib/api";
 import { ajax } from "discourse/lib/ajax";
 
-// -------------------------------------------------------
-// discourse-topic-hover-cards
-// Shows a rich topic card as a hover tooltip whenever a
-// user mouses over any internal topic link inside a post
-// or reply body, topic lists, or suggested topics.
-//
-// On mobile (touch devices) the card opens on tap when
-// enable_on_mobile is true.
-// -------------------------------------------------------
-
 const DELAY_SHOW = settings.card_delay_ms ?? 300;
 const DELAY_HIDE = 200;
 const CARD_WIDTH = settings.card_width || "32rem";
@@ -19,7 +9,6 @@ const CARD_MAX_H = settings.card_max_height || "10rem";
 const MOBILE_ENABLED = settings.enable_on_mobile ?? false;
 const VIEWPORT_MARGIN = 12;
 
-// Matches /t/some-slug/123 or /t/123 (with optional /post-number)
 const TOPIC_LINK_RE = /\/t\/(?:[^/]+\/)?([0-9]+)(?:\/[0-9]+)?/;
 
 function isTouchDevice() {
@@ -56,8 +45,7 @@ function stripHtml(html) {
     )
     .forEach((el) => el.remove());
 
-  const text = (doc.body.textContent || "").replace(/\s+/g, " ").trim();
-  return text;
+  return (doc.body.textContent || "").replace(/\s+/g, " ").trim();
 }
 
 function skeletonHTML() {
@@ -128,54 +116,20 @@ function mobileInt(name, mobileName, fallback, isMobile) {
 function buildCardHTML(topic, site, isMobile = false) {
   const topicUrl = `${window.location.origin}/t/${topic.slug || topic.id}/${topic.id}`;
 
-  const showThumbnail = mobileBool(
-    "show_thumbnail",
-    "show_thumbnail_mobile",
-    isMobile
-  );
-  const showCategory = mobileBool(
-    "show_category",
-    "show_category_mobile",
-    isMobile
-  );
+  const showThumbnail = mobileBool("show_thumbnail", "show_thumbnail_mobile", isMobile);
+  const showCategory = mobileBool("show_category", "show_category_mobile", isMobile);
   const showTags = mobileBool("show_tags", "show_tags_mobile", isMobile);
   const showTitle = mobileBool("show_title", "show_title_mobile", isMobile);
-  const showExcerpt = mobileBool(
-    "show_excerpt",
-    "show_excerpt_mobile",
-    isMobile
-  );
+  const showExcerpt = mobileBool("show_excerpt", "show_excerpt_mobile", isMobile);
   const showOp = mobileBool("show_op", "show_op_mobile", isMobile);
-  const showPublishDate = mobileBool(
-    "show_publish_date",
-    "show_publish_date_mobile",
-    isMobile
-  );
+  const showPublishDate = mobileBool("show_publish_date", "show_publish_date_mobile", isMobile);
   const showViews = mobileBool("show_views", "show_views_mobile", isMobile);
-  const showReplyCount = mobileBool(
-    "show_reply_count",
-    "show_reply_count_mobile",
-    isMobile
-  );
+  const showReplyCount = mobileBool("show_reply_count", "show_reply_count_mobile", isMobile);
   const showLikes = mobileBool("show_likes", "show_likes_mobile", isMobile);
-  const showActivity = mobileBool(
-    "show_activity",
-    "show_activity_mobile",
-    isMobile
-  );
+  const showActivity = mobileBool("show_activity", "show_activity_mobile", isMobile);
 
-  const excerptLength = mobileInt(
-    "excerpt_length",
-    "excerpt_length_mobile",
-    3,
-    isMobile
-  );
-  const imageSizePercent = mobileInt(
-    "image_size_percent",
-    "image_size_percent_mobile",
-    30,
-    isMobile
-  );
+  const excerptLength = mobileInt("excerpt_length", "excerpt_length_mobile", 3, isMobile);
+  const imageSizePercent = mobileInt("image_size_percent", "image_size_percent_mobile", 30, isMobile);
 
   const configuredPlacement = settings.thumbnail_placement || "left";
   const placement = isMobile ? "top" : configuredPlacement;
@@ -223,9 +177,7 @@ function buildCardHTML(topic, site, isMobile = false) {
 
   let tagsHTML = "";
   if (showTags && Array.isArray(topic.tags) && topic.tags.length) {
-    const normalizedTags = topic.tags
-      .map((tag) => normalizeTag(tag))
-      .filter(Boolean);
+    const normalizedTags = topic.tags.map((tag) => normalizeTag(tag)).filter(Boolean);
 
     if (normalizedTags.length) {
       tagsHTML = `
@@ -239,14 +191,12 @@ function buildCardHTML(topic, site, isMobile = false) {
   }
 
   const title = topic.fancy_title ?? topic.title ?? "(no title)";
-
   const titleHTML = showTitle
     ? `<div class="topic-hover-card__title">${title}</div>`
     : "";
 
   const firstPost = topic.post_stream?.posts?.[0];
   const excerptSource = topic.excerpt || firstPost?.excerpt || firstPost?.cooked || "";
-
   const cleanedExcerpt = stripHtml(excerptSource);
   const finalExcerpt = cleanedExcerpt.length >= 20 ? cleanedExcerpt : "";
 
@@ -293,24 +243,16 @@ function buildCardHTML(topic, site, isMobile = false) {
   const statItems = [];
 
   if (showViews) {
-    statItems.push(
-      `<span class="topic-hover-card__stat">${dIconSVG("eye")} ${fmtNum(topic.views)}</span>`
-    );
+    statItems.push(`<span class="topic-hover-card__stat">${dIconSVG("eye")} ${fmtNum(topic.views)}</span>`);
   }
 
   if (showReplyCount) {
-    statItems.push(
-      `<span class="topic-hover-card__stat">${dIconSVG("comment")} ${fmtNum(
-        topic.reply_count ?? topic.posts_count - 1
-      )}</span>`
-    );
+    statItems.push(`<span class="topic-hover-card__stat">${dIconSVG("comment")} ${fmtNum(topic.reply_count ?? topic.posts_count - 1)}</span>`);
   }
 
   if (showLikes) {
     const likes = topic.like_count ?? topic.topic_post_like_count ?? 0;
-    statItems.push(
-      `<span class="topic-hover-card__stat">${dIconSVG("heart")} ${fmtNum(likes)}</span>`
-    );
+    statItems.push(`<span class="topic-hover-card__stat">${dIconSVG("heart")} ${fmtNum(likes)}</span>`);
   }
 
   if (showActivity && topic.last_posted_at) {
@@ -320,9 +262,7 @@ function buildCardHTML(topic, site, isMobile = false) {
       day: "numeric",
       year: "numeric",
     });
-    statItems.push(
-      `<span class="topic-hover-card__stat">${dIconSVG("clock")} ${fmt}</span>`
-    );
+    statItems.push(`<span class="topic-hover-card__stat">${dIconSVG("clock")} ${fmt}</span>`);
   }
 
   const statsHTML = statItems.length
@@ -330,7 +270,6 @@ function buildCardHTML(topic, site, isMobile = false) {
     : "";
 
   const metadataItems = [opHTML, publishDate, statsHTML].filter(Boolean).join("");
-
   const metadata = metadataItems
     ? `<div class="topic-hover-card__metadata">${metadataItems}</div>`
     : "";
@@ -353,7 +292,12 @@ function buildCardHTML(topic, site, isMobile = false) {
       ${mobileActions}
   `;
 
-  const wrapperStyle = `style="--thc-image-size-percent:${imageSizePercent};"`;
+  const wrapperStyle = `
+    style="
+      --thc-image-size-percent:${imageSizePercent};
+      --thc-mobile-image-height:${Math.max(96, Math.round((imageSizePercent / 100) * 220))}px;
+    "
+  `;
 
   switch (placement) {
     case "left":
@@ -409,7 +353,7 @@ export default apiInitializer((api) => {
   let currentTopicId = null;
   let topicCache = {};
   let isInsideCard = false;
-  let mobileTappedLink = null;
+  let suppressNextClick = false;
 
   function ensureTooltip() {
     if (tooltip) return;
@@ -433,16 +377,13 @@ export default apiInitializer((api) => {
 
     tooltip.addEventListener("click", (event) => {
       const inCard = event.target.closest(".topic-hover-card");
-      if (!inCard) {
-        return;
-      }
+      if (!inCard) return;
 
       const closeBtn = event.target.closest("[data-thc-close]");
       if (closeBtn) {
         event.preventDefault();
         event.stopPropagation();
         hideCard();
-        mobileTappedLink = null;
         return;
       }
 
@@ -450,7 +391,6 @@ export default apiInitializer((api) => {
       if (openBtn) {
         event.stopPropagation();
         hideCard();
-        mobileTappedLink = null;
         return;
       }
 
@@ -459,37 +399,6 @@ export default apiInitializer((api) => {
         event.stopPropagation();
       }
     });
-
-    tooltip.addEventListener(
-      "touchend",
-      (event) => {
-        const inCard = event.target.closest(".topic-hover-card");
-        if (!inCard || !onMobile) {
-          return;
-        }
-
-        const closeBtn = event.target.closest("[data-thc-close]");
-        if (closeBtn) {
-          event.preventDefault();
-          event.stopPropagation();
-          hideCard();
-          mobileTappedLink = null;
-          return;
-        }
-
-        const openBtn = event.target.closest("[data-thc-open-topic]");
-        if (openBtn) {
-          event.stopPropagation();
-          hideCard();
-          mobileTappedLink = null;
-          return;
-        }
-
-        event.preventDefault();
-        event.stopPropagation();
-      },
-      { passive: false }
-    );
 
     document.body.appendChild(tooltip);
   }
@@ -500,10 +409,7 @@ export default apiInitializer((api) => {
     const vw = window.innerWidth;
     const vh = window.innerHeight;
     const cardH = tooltip.offsetHeight || 320;
-    const cardW = Math.min(
-      tooltip.offsetWidth || 512,
-      vw - VIEWPORT_MARGIN * 2
-    );
+    const cardW = Math.min(tooltip.offsetWidth || 512, vw - VIEWPORT_MARGIN * 2);
 
     let top = anchorRect.bottom + 10;
     let isAbove = false;
@@ -530,10 +436,7 @@ export default apiInitializer((api) => {
     ensureTooltip();
     cancel(hideTimer);
 
-    if (
-      currentTopicId === topicId &&
-      tooltip.classList.contains("is-visible")
-    ) {
+    if (currentTopicId === topicId && tooltip.classList.contains("is-visible")) {
       positionTooltip(anchorRect);
       return;
     }
@@ -596,28 +499,18 @@ export default apiInitializer((api) => {
 
   function linkInSupportedArea(link) {
     const inSuggested = !!link.closest(".suggested-topics");
-    if (inSuggested && settings.enable_on_suggested_topic_links) {
-      return true;
-    }
+    if (inSuggested && settings.enable_on_suggested_topic_links) return true;
 
     const inTopicList = !!link.closest(".topic-list");
-    if (inTopicList && settings.enable_on_topic_lists) {
-      return true;
-    }
+    if (inTopicList && settings.enable_on_topic_lists) return true;
 
     const post = link.closest(".topic-post");
     const inPostCooked = !!link.closest(".topic-post .cooked");
 
     if (inPostCooked && post) {
       const isFirstPost = post.classList.contains("topic-owner");
-
-      if (isFirstPost && settings.enable_on_topics) {
-        return true;
-      }
-
-      if (!isFirstPost && settings.enable_on_replies) {
-        return true;
-      }
+      if (isFirstPost && settings.enable_on_topics) return true;
+      if (!isFirstPost && settings.enable_on_replies) return true;
     }
 
     return false;
@@ -645,7 +538,7 @@ export default apiInitializer((api) => {
     scheduleHide();
   }
 
-  function onTouchEnd(event) {
+  function onTouchStart(event) {
     if (!onMobile || !MOBILE_ENABLED) return;
 
     if (event.target.closest(".topic-hover-card-tooltip")) {
@@ -653,15 +546,7 @@ export default apiInitializer((api) => {
     }
 
     const link = event.target.closest("a[href]");
-
-    if (!link) {
-      if (tooltip?.classList.contains("is-visible")) {
-        hideCard();
-        mobileTappedLink = null;
-      }
-      return;
-    }
-
+    if (!link) return;
     if (!linkInSupportedArea(link)) return;
 
     const topicId = topicIdFromHref(link.href);
@@ -669,26 +554,46 @@ export default apiInitializer((api) => {
 
     event.preventDefault();
     event.stopPropagation();
-    mobileTappedLink = link;
+    suppressNextClick = true;
     showCard(topicId, link.getBoundingClientRect());
+  }
+
+  function onDocumentClick(event) {
+    if (!onMobile || !MOBILE_ENABLED) return;
+
+    if (suppressNextClick) {
+      const link = event.target.closest("a[href]");
+      if (link && linkInSupportedArea(link) && topicIdFromHref(link.href)) {
+        event.preventDefault();
+        event.stopPropagation();
+        suppressNextClick = false;
+        return;
+      }
+    }
+
+    if (event.target.closest(".topic-hover-card-tooltip")) {
+      return;
+    }
+
+    if (tooltip?.classList.contains("is-visible")) {
+      hideCard();
+    }
   }
 
   document.addEventListener("mouseover", onMouseEnter, { passive: true });
   document.addEventListener("mouseout", onMouseLeave, { passive: true });
-  document.addEventListener("touchend", onTouchEnd, { passive: false });
+  document.addEventListener("touchstart", onTouchStart, { passive: false });
+  document.addEventListener("click", onDocumentClick, true);
 
   document.addEventListener(
     "scroll",
     (event) => {
-      if (
-        event.target?.closest?.(".topic-hover-card, .topic-hover-card-tooltip")
-      ) {
+      if (event.target?.closest?.(".topic-hover-card, .topic-hover-card-tooltip")) {
         return;
       }
 
       cancel(showTimer);
       hideCard();
-      mobileTappedLink = null;
     },
     { passive: true, capture: true }
   );
@@ -698,6 +603,6 @@ export default apiInitializer((api) => {
     cancel(hideTimer);
     hideCard();
     currentTopicId = null;
-    mobileTappedLink = null;
+    suppressNextClick = false;
   });
 });
