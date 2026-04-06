@@ -958,18 +958,34 @@ function linkInSupportedArea(link) {
   return false;
 }
 
-    function onMouseEnter(event) {
-      if (isMobileView()) return;
+function onMouseEnter(event) {
+  if (isMobileView()) return;
 
-      const link = event.target.closest("a[href]");
-      if (!link) return;
-      if (!linkInSupportedArea(link)) return;
+  const link = event.target.closest("a[href]");
+  if (!link) return;
 
-      const topicId = topicIdFromHref(link.href);
-      if (!topicId) return;
+  const supported = linkInSupportedArea(link);
+  if (!supported) return;
 
-      scheduleShow(topicId, link.getBoundingClientRect());
-    }
+  const topicId = topicIdFromHref(link.href);
+
+  debugLog("onMouseEnter reached supported link", {
+    href: link.href,
+    topicId,
+    pathname: window.location.pathname,
+    bodyClasses: [...document.body.classList],
+    htmlClasses: [...document.documentElement.classList],
+  });
+
+  if (!topicId) {
+    debugLog("No topic ID parsed from supported link", {
+      href: link.href,
+    });
+    return;
+  }
+
+  scheduleShow(topicId, link.getBoundingClientRect());
+}
 
     function onMouseLeave(event) {
       if (isMobileView()) return;
