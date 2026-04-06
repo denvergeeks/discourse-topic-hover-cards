@@ -206,7 +206,7 @@ Current defaults:
 - `show_tags_mobile: true`
 - `show_title_mobile: true`
 - `show_excerpt_mobile: true`
-- `excerpt_length_mobile: 2`
+- `excerpt_length_mobile: 3`
 - `show_op_mobile: true`
 - `show_publish_date_mobile: true`
 - `show_views_mobile: true`
