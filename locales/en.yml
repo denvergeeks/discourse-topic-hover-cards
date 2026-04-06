@@ -44,3 +44,15 @@ en:
 
     show_activity: "Show last activity"
     show_activity_description: "Display the most recent topic activity date."
+
+        enable_on_topics: "Enable on topics"
+    enable_on_topics_description: "Show hover cards for topic links inside the original post."
+
+    enable_on_replies: "Enable on replies"
+    enable_on_replies_description: "Show hover cards for topic links inside replies."
+
+    enable_on_topic_lists: "Enable on topic lists"
+    enable_on_topic_lists_description: "Show hover cards for topic links in topic lists."
+
+    enable_on_suggested_topic_links: "Enable on suggested topic links"
+    enable_on_suggested_topic_links_description: "Show hover cards for links in the suggested topics section."
