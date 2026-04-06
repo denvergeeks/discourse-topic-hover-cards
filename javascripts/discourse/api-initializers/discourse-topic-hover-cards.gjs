@@ -17,15 +17,15 @@ const VIEWPORT_MARGIN = 12;
 const TOPIC_LINK_RE = /\/t\/(?:[^/]+\/)?([0-9]+)(?:\/[0-9]+)?/;
 
 function isTouchDevice() {
-  return (
-    "ontouchstart" in window ||
-    navigator.maxTouchPoints > 0 ||
-    navigator.msMaxTouchPoints > 0
-  );
+  return window.matchMedia("(hover: none) and (pointer: coarse)").matches;
 }
 
 function isMobileView() {
-  return isTouchDevice();
+  const hasHover =
+    window.matchMedia("(any-hover: hover)").matches ||
+    window.matchMedia("(hover: hover)").matches;
+
+  return !hasHover;
 }
 
 async function getJSON(url) {
@@ -705,8 +705,6 @@ function buildCardHTML(topic, site, isMobile = false) {
 }
 
 export default apiInitializer((api) => {
-console.log("THC initializer loaded");
-
   const site = api.container.lookup("service:site");
   const currentUser =
     api.getCurrentUser?.() || api.container.lookup("service:current-user");
@@ -926,31 +924,18 @@ console.log("THC initializer loaded");
       return false;
     }
 
-function onMouseEnter(event) {
-  const link = event.target.closest("a[href]");
+    function onMouseEnter(event) {
+      if (isMobileView()) return;
 
-  console.log("THC onMouseEnter fired", {
-    mobile: isMobileView(),
-    hasLink: !!link,
-    href: link?.href || null,
-    bodyClasses: document.body.className,
-  });
+      const link = event.target.closest("a[href]");
+      if (!link) return;
+      if (!linkInSupportedArea(link)) return;
 
-  if (isMobileView()) return;
-  if (!link) return;
-  // if (!linkInSupportedArea(link)) return;
+      const topicId = topicIdFromHref(link.href);
+      if (!topicId) return;
 
-  const topicId = topicIdFromHref(link.href);
-
-  console.log("THC after topicId check", {
-    topicId,
-    supportedArea: link ? linkInSupportedArea(link) : false,
-  });
-
-  if (!topicId) return;
-
-  scheduleShow(topicId, link.getBoundingClientRect());
-}
+      scheduleShow(topicId, link.getBoundingClientRect());
+    }
 
     function onMouseLeave(event) {
       if (isMobileView()) return;
