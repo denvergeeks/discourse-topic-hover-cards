@@ -350,10 +350,11 @@
   .topic-hover-card-tooltip .topic-hover-card {
     width: 100% !important;
     max-width: 100% !important;
-    max-height: 55vh;
-    flex-direction: column !important;
+    max-height: 55vh !important;
+    display: block !important;
     border-radius: 12px 12px 0 0;
     box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.18);
+    overflow: hidden;
 
     &::before {
       content: "";
@@ -363,23 +364,22 @@
       background: var(--primary-low);
       border-radius: 2px;
       margin: 8px auto 4px;
-      flex: 0 0 auto;
     }
   }
 
   .topic-hover-card-tooltip .topic-hover-card .topic-hover-card__thumbnail {
-    order: 0 !important;
+    display: block !important;
     width: 100% !important;
     height: var(--thc-mobile-image-height, 160px) !important;
     min-height: 0 !important;
-    flex: 0 0 var(--thc-mobile-image-height, 160px) !important;
+    max-height: none !important;
+    flex: none !important;
+    overflow: hidden;
   }
 
   .topic-hover-card-tooltip .topic-hover-card .topic-hover-card__body {
-    order: 1 !important;
-    flex: 1 1 auto;
-    min-height: 0;
-    min-width: 0;
+    display: block;
+    max-height: calc(55vh - var(--thc-mobile-image-height, 160px) - 24px);
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
     padding: 0.85rem 0.9rem 0.9rem;
