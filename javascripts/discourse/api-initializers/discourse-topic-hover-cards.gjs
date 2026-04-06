@@ -25,7 +25,11 @@ function isMobileView() {
     window.matchMedia("(any-hover: hover)").matches ||
     window.matchMedia("(hover: hover)").matches;
 
-  return !hasHover;
+  if (hasHover) {
+    return false;
+  }
+
+  return window.innerWidth < 768;
 }
 
 async function getJSON(url) {
