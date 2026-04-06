@@ -533,7 +533,12 @@ function buildCardHTML(topic, site, isMobile = false) {
   const excerptSource =
     topic.excerpt || firstPost?.excerpt || firstPost?.cooked || "";
   const cleanedExcerpt = stripHtml(excerptSource);
-  const finalExcerpt = cleanedExcerpt.length >= 20 ? cleanedExcerpt : "";
+  const finalExcerpt =
+    cleanedExcerpt.length >= 20
+      ? `${cleanedExcerpt.slice(0, isMobile ? 180 : 260).trim()}${
+          cleanedExcerpt.length > (isMobile ? 180 : 260) ? "…" : ""
+        }`
+      : "";
 
   const excerpt =
     showExcerpt && finalExcerpt
