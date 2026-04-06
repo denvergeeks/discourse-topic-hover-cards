@@ -156,3 +156,7 @@ show_activity:
 show_activity_mobile:
   type: bool
   default: false
+
+user_preference_field_name:
+  type: string
+  default: "disable_topic_hover_cards"
