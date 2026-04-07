@@ -25,7 +25,15 @@ function isMobileView() {
     window.matchMedia("(any-hover: hover)").matches ||
     window.matchMedia("(hover: hover)").matches;
 
-  return !hasHover;
+  if (hasHover) {
+    return false;
+  }
+
+  return window.innerWidth < 768;
+}
+
+function isMobileLayout() {
+  return window.innerWidth < 768;
 }
 
 async function getJSON(url) {
@@ -543,16 +551,11 @@ function buildCardHTML(topic, site, isMobile = false) {
     ? `<div class="topic-hover-card__title">${title}</div>`
     : "";
 
-  const firstPost = topic.post_stream?.posts?.[0];
-  const excerptSource =
-    topic.excerpt || firstPost?.excerpt || firstPost?.cooked || "";
-  const cleanedExcerpt = stripHtml(excerptSource);
-  const limit = isMobile ? 180 : 260;
-  const finalExcerpt =
-    cleanedExcerpt.length >= 20
-      ? cleanedExcerpt.slice(0, limit).trim() +
-        (cleanedExcerpt.length > limit ? "…" : "")
-      : "";
+const firstPost = topic.post_stream?.posts?.[0];
+const excerptSource =
+  topic.excerpt || firstPost?.excerpt || firstPost?.cooked || "";
+const cleanedExcerpt = stripHtml(excerptSource);
+const finalExcerpt = cleanedExcerpt.length >= 20 ? cleanedExcerpt : "";
 
   const excerpt =
     showExcerpt && finalExcerpt
@@ -704,6 +707,29 @@ function buildCardHTML(topic, site, isMobile = false) {
   }
 }
 
+const cardHeightObserver = new ResizeObserver((entries) => {
+  for (const entry of entries) {
+    entry.target.style.setProperty(
+      "--thc-card-height",
+      `${entry.contentRect.height}px`
+    );
+  }
+});
+
+function observeCardHeight(tooltip) {
+  if (!tooltip) return;
+
+  const card = tooltip.querySelector(".topic-hover-card");
+  if (!card) return;
+
+  cardHeightObserver.disconnect();
+  cardHeightObserver.observe(card);
+  card.style.setProperty(
+    "--thc-card-height",
+    `${card.getBoundingClientRect().height}px`
+  );
+}
+
 export default apiInitializer((api) => {
   const site = api.container.lookup("service:site");
   const currentUser =
@@ -827,12 +853,15 @@ export default apiInitializer((api) => {
       }
 
       currentTopicId = topicId;
-      const mobile = isMobileView();
+//      const mobile = isMobileView();
+const mobile = isMobileLayout();
 
       if (topicCache[topicId]) {
         tooltip.innerHTML = buildCardHTML(topicCache[topicId], site, mobile);
+        observeCardHeight(tooltip);
       } else {
         tooltip.innerHTML = skeletonHTML();
+        observeCardHeight(tooltip);
         fetchTopic(topicId)
           .then((data) => {
             if (currentTopicId === topicId) {
@@ -840,8 +869,10 @@ export default apiInitializer((api) => {
               tooltip.innerHTML = buildCardHTML(
                 data,
                 site,
-                isMobileView()
+//                isMobileView()
+isMobileLayout()
               );
+              observeCardHeight(tooltip);
               positionTooltip(anchorRect);
             }
           })
@@ -1016,6 +1047,7 @@ export default apiInitializer((api) => {
       hideCard();
       currentTopicId = null;
       suppressNextClick = false;
+      cardHeightObserver.disconnect();
     });
 
     debugLog("Hover cards initialized", {
