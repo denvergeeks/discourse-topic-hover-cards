@@ -7,6 +7,7 @@ const CARD_WIDTH = settings.card_width || "32rem";
 const CARD_MAX_H = settings.card_max_height || "10rem";
 const MOBILE_ENABLED = settings.enable_on_mobile ?? false;
 const MOBILE_WIDTH_PERCENT = settings.mobile_width_percent ?? 100;
+const TOPIC_CACHE_MAX = settings.topic_cache_max ?? 100;
 const USER_PREFERENCE_FIELD_NAME =
   settings.user_preference_field_name || "disable_topic_hover_cards";
 const DEBUG_MODE = settings.debug_mode ?? false;
@@ -15,10 +16,6 @@ const RESOLVE_USER_FIELD_ID_FOR_ADMINS =
 const VIEWPORT_MARGIN = 12;
 
 const TOPIC_LINK_RE = /\/t\/(?:[^/]+\/)?([0-9]+)(?:\/[0-9]+)?/;
-
-function isTouchDevice() {
-  return window.matchMedia("(hover: none) and (pointer: coarse)").matches;
-}
 
 function isMobileView() {
   const hasHover =
@@ -51,17 +48,41 @@ async function getJSON(url) {
   return await response.json();
 }
 
-function topicIdFromHref(href) {
+function currentTopicIdFromLocation() {
+  const m = window.location.pathname.match(TOPIC_LINK_RE);
+  return m ? parseInt(m[1], 10) : null;
+}
+
+function currentTopicPathFromLocation() {
+  try {
+    return new URL(window.location.href).pathname.replace(/\/+$/, "");
+  } catch {
+    return window.location.pathname.replace(/\/+$/, "");
+  }
+}
+
+function parsedTopicUrl(href) {
   if (!href) return null;
 
   try {
     const url = new URL(href, window.location.origin);
     if (url.origin !== window.location.origin) return null;
-    const m = url.pathname.match(TOPIC_LINK_RE);
-    return m ? parseInt(m[1], 10) : null;
+
+    const match = url.pathname.match(TOPIC_LINK_RE);
+    if (!match) return null;
+
+    return {
+      url,
+      topicId: parseInt(match[1], 10),
+    };
   } catch {
     return null;
   }
+}
+
+function topicIdFromHref(href) {
+  const parsed = parsedTopicUrl(href);
+  return parsed ? parsed.topicId : null;
 }
 
 function fmtNum(n) {
@@ -205,6 +226,31 @@ function findTruthyFieldMatch(record, candidateKeys) {
   }
 
   return null;
+}
+
+function getCachedTopic(cache, topicId) {
+  if (!cache.has(topicId)) {
+    return null;
+  }
+
+  const value = cache.get(topicId);
+
+  cache.delete(topicId);
+  cache.set(topicId, value);
+
+  return value;
+}
+
+function setCachedTopic(cache, topicId, topic) {
+  if (cache.has(topicId)) {
+    cache.delete(topicId);
+  }
+
+  cache.set(topicId, topic);
+
+  if (cache.size > TOPIC_CACHE_MAX) {
+    cache.delete(cache.keys().next().value);
+  }
 }
 
 let resolvedUserFieldIdPromise = null;
@@ -375,52 +421,103 @@ async function hoverCardsDisabledForUser(api, currentUser) {
 }
 
 function inDocCategoriesView(link) {
-  return (
-    !!link.closest(".doc-categories") ||
-    !!link.closest(".doc-categories-container") ||
-    !!link.closest("[class*='doc-categories']") ||
-    document.body.classList.contains("doc-categories")
+  return !!link.closest(
+    ".doc-categories a, .doc-categories-container a, [class*='doc-categories'] a"
   );
 }
 
 function inKanbanView(link) {
-  return (
-    !!link.closest(".kanban-board") ||
-    !!link.closest(".kanban-column") ||
-    !!link.closest(".kanban-card") ||
-    !!link.closest("[class*='kanban']") ||
-    document.body.classList.contains("kanban")
+  return !!link.closest(
+    ".kanban-board a, .kanban-column a, .kanban-card a, [class*='kanban'] a"
   );
 }
 
 function inCategoryHomepageTopicList(link) {
-  const href = link.getAttribute("href") || "";
-  const isTopicLink =
-    !!topicIdFromHref(link.href) || /^\/t\/(?:[^/]+\/)?\d+/.test(href);
+  return !!link.closest(
+    ".categories-and-latest-topics a.title, " +
+      ".categories-and-latest-topics .main-link a, " +
+      ".categories-and-featured-topics a.title, " +
+      ".categories-and-featured-topics .main-link a, " +
+      ".categories-with-featured-topics a.title, " +
+      ".categories-with-featured-topics .main-link a, " +
+      ".categories-only a.title, " +
+      ".categories-only .main-link a"
+  );
+}
 
-  if (!isTopicLink) {
+function inTopicList(link) {
+  return !!link.closest(
+    ".topic-list a.title, .topic-list .main-link a, [class*='topic-list'] a.title, [class*='topic-list'] .main-link a"
+  );
+}
+
+function inSuggestedTopics(link) {
+  return !!link.closest(
+    ".suggested-topics a.title, .suggested-topics .main-link a"
+  );
+}
+
+function inCookedPost(link) {
+  return !!link.closest(".topic-post .cooked a");
+}
+
+function isCurrentTopicLink(link) {
+  const parsed = parsedTopicUrl(link?.href);
+  if (!parsed) return false;
+
+  const currentTopicId = currentTopicIdFromLocation();
+  if (currentTopicId && parsed.topicId === currentTopicId) {
+    return true;
+  }
+
+  return (
+    parsed.url.pathname.replace(/\/+$/, "") === currentTopicPathFromLocation()
+  );
+}
+
+function isCookedPostFragmentLink(link) {
+  if (!link || !inCookedPost(link)) return false;
+
+  const href = link.getAttribute("href") || "";
+  if (href.startsWith("#")) return true;
+
+  try {
+    const url = new URL(link.href, window.location.origin);
+    return !!url.hash;
+  } catch {
+    return false;
+  }
+}
+
+function isEligiblePreviewLink(link) {
+  if (!link) return false;
+
+  const parsed = parsedTopicUrl(link.href);
+  if (!parsed) {
     return false;
   }
 
-  const body = document.body;
-  const html = document.documentElement;
+  if (inCookedPost(link)) {
+    if (isCurrentTopicLink(link)) {
+      debugLog("Skipping current-topic cooked-post link", {
+        href: link.href,
+      });
+      return false;
+    }
 
-  const bodyClasses = [...body.classList];
-  const htmlClasses = [...html.classList];
+    if (isCookedPostFragmentLink(link)) {
+      debugLog("Skipping cooked-post fragment link", {
+        href: link.href,
+      });
+      return false;
+    }
+  }
 
-  const inCategoriesHomepage =
-    bodyClasses.includes("navigation-categories") ||
-    bodyClasses.includes("categories-list") ||
-    bodyClasses.includes("category-list") ||
-    htmlClasses.includes("categories") ||
-    !!document.querySelector(".categories-and-latest-topics") ||
-    !!document.querySelector(".categories-and-featured-topics") ||
-    !!document.querySelector(".categories-with-featured-topics") ||
-    !!document.querySelector(".categories-only") ||
-    window.location.pathname === "/categories" ||
-    window.location.pathname === "/";
+  return true;
+}
 
-  return inCategoriesHomepage;
+function isTopicAnchor(link) {
+  return isEligiblePreviewLink(link);
 }
 
 function buildCardHTML(topic, site, isMobile = false) {
@@ -551,11 +648,11 @@ function buildCardHTML(topic, site, isMobile = false) {
     ? `<div class="topic-hover-card__title">${title}</div>`
     : "";
 
-const firstPost = topic.post_stream?.posts?.[0];
-const excerptSource =
-  topic.excerpt || firstPost?.excerpt || firstPost?.cooked || "";
-const cleanedExcerpt = stripHtml(excerptSource);
-const finalExcerpt = cleanedExcerpt.length >= 20 ? cleanedExcerpt : "";
+  const firstPost = topic.post_stream?.posts?.[0];
+  const excerptSource =
+    topic.excerpt || firstPost?.excerpt || firstPost?.cooked || "";
+  const cleanedExcerpt = stripHtml(excerptSource);
+  const finalExcerpt = cleanedExcerpt.length >= 20 ? cleanedExcerpt : "";
 
   const excerpt =
     showExcerpt && finalExcerpt
@@ -752,7 +849,7 @@ export default apiInitializer((api) => {
     let showTimer = null;
     let hideTimer = null;
     let currentTopicId = null;
-    let topicCache = {};
+    let topicCache = new Map();
     let isInsideCard = false;
     let suppressNextClick = false;
 
@@ -853,25 +950,20 @@ export default apiInitializer((api) => {
       }
 
       currentTopicId = topicId;
-//      const mobile = isMobileView();
-const mobile = isMobileLayout();
+      const mobile = isMobileLayout();
+      const cachedTopic = getCachedTopic(topicCache, topicId);
 
-      if (topicCache[topicId]) {
-        tooltip.innerHTML = buildCardHTML(topicCache[topicId], site, mobile);
+      if (cachedTopic) {
+        tooltip.innerHTML = buildCardHTML(cachedTopic, site, mobile);
         observeCardHeight(tooltip);
       } else {
         tooltip.innerHTML = skeletonHTML();
         observeCardHeight(tooltip);
+
         fetchTopic(topicId)
           .then((data) => {
             if (currentTopicId === topicId) {
-              topicCache[topicId] = data;
-              tooltip.innerHTML = buildCardHTML(
-                data,
-                site,
-//                isMobileView()
-isMobileLayout()
-              );
+              tooltip.innerHTML = buildCardHTML(data, site, isMobileLayout());
               observeCardHeight(tooltip);
               positionTooltip(anchorRect);
             }
@@ -912,44 +1004,53 @@ isMobileLayout()
     }
 
     async function fetchTopic(topicId) {
-      if (topicCache[topicId]) return topicCache[topicId];
+      const cachedTopic = getCachedTopic(topicCache, topicId);
+      if (cachedTopic) return cachedTopic;
+
       const data = await getJSON(`/t/${topicId}.json`);
-      topicCache[topicId] = data;
+      setCachedTopic(topicCache, topicId, data);
       return data;
     }
 
     function linkInSupportedArea(link) {
-      const inSuggested = !!link.closest(".suggested-topics");
-      if (inSuggested) {
-        return settings.enable_on_suggested_topic_links;
+      if (!isTopicAnchor(link)) {
+        return false;
       }
 
-      if (inDocCategoriesView(link)) {
-        return settings.enable_on_doc_categories;
+      if (settings.enable_on_suggested_topic_links && inSuggestedTopics(link)) {
+        return true;
       }
 
-      if (inKanbanView(link)) {
-        return settings.enable_on_kanban_boards;
+      if (settings.enable_on_doc_categories && inDocCategoriesView(link)) {
+        return true;
       }
 
-      if (inCategoryHomepageTopicList(link)) {
-        return settings.enable_on_category_homepage_topic_lists;
+      if (settings.enable_on_kanban_boards && inKanbanView(link)) {
+        return true;
       }
 
-      const inTopicList =
-        !!link.closest(".topic-list") || !!link.closest("[class*='topic-list']");
-      if (inTopicList) {
-        return settings.enable_on_topic_lists;
+      if (
+        settings.enable_on_category_homepage_topic_lists &&
+        inCategoryHomepageTopicList(link)
+      ) {
+        return true;
       }
 
-      const post = link.closest(".topic-post");
-      const inPostCooked = !!link.closest(".topic-post .cooked");
+      if (settings.enable_on_topic_lists && inTopicList(link)) {
+        return true;
+      }
 
-      if (inPostCooked && post) {
-        const isFirstPost = post.classList.contains("topic-owner");
-        return isFirstPost
-          ? settings.enable_on_topics
-          : settings.enable_on_replies;
+      if (inCookedPost(link)) {
+        const post = link.closest(".topic-post");
+        const isFirstPost = post?.classList.contains("topic-owner");
+
+        if (isFirstPost && settings.enable_on_topics) {
+          return true;
+        }
+
+        if (!isFirstPost && settings.enable_on_replies) {
+          return true;
+        }
       }
 
       return false;
@@ -972,7 +1073,7 @@ isMobileLayout()
       if (isMobileView()) return;
 
       const link = event.target.closest("a[href]");
-      if (!link || !topicIdFromHref(link.href)) return;
+      if (!link || !linkInSupportedArea(link)) return;
 
       scheduleHide();
     }
@@ -1052,6 +1153,7 @@ isMobileLayout()
 
     debugLog("Hover cards initialized", {
       mobileEnabled: MOBILE_ENABLED,
+      topicCacheMax: TOPIC_CACHE_MAX,
       configuredField: USER_PREFERENCE_FIELD_NAME,
       currentViewportIsMobile: isMobileView(),
       locations: {
